@@ -9,7 +9,7 @@ use App\Models\Product;
 
 class IndexController extends Controller
 {
-    // Front-end display
+    // Declare for front-end display
     public function index(){
         $sliderBanners = Banner::where('type','Slider')->where('status',1)->get()->toArray();
         $fixBanners = Banner::where('type','Fix')->where('status',1)->get()->toArray();

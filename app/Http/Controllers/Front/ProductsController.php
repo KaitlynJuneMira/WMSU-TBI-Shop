@@ -30,6 +30,7 @@ use Auth;
 
 class ProductsController extends Controller
 {
+    // Product filtering
     public function listing(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -38,11 +39,10 @@ class ProductsController extends Controller
             $_GET['sort'] = $data['sort'];
             $categoryCount = Category::where(['url'=>$url,'status'=>1])->count();
             if($categoryCount>0){
-                // Get Category Details
+                // Get category details
                 $categoryDetails = Category::categoryDetails($url);
                 $categoryProducts = Product::with('brand')->whereIn('category_id',$categoryDetails['catIds'])->where('status',1);
-
-                // Checking for Dynamic Filters
+                // Checking for dynamic filters
                 $productFilters = ProductsFilter::productFilters();
                 foreach ($productFilters as $key => $filter) {
                     // If filter is selected
@@ -50,8 +50,7 @@ class ProductsController extends Controller
                         $categoryProducts->whereIn($filter['filter_column'],$data[$filter['filter_column']]);
                     }
                 }
-
-                // checking for Sort
+                // Checking for sort
                 if(isset($_GET['sort']) && !empty($_GET['sort'])){
                     if($_GET['sort']=="product_latest"){
                         $categoryProducts->orderby('products.id','Desc');
@@ -65,43 +64,29 @@ class ProductsController extends Controller
                         $categoryProducts->orderby('products.product_name','Asc');
                     }
                 }
-
-                // checking for Size
+                // Checking for size
                 if(isset($data['size']) && !empty($data['size'])){
                     $productIds = ProductsAttribute::select('product_id')->whereIn('size',$data['size'])->pluck('product_id')->toArray();
                     $categoryProducts->whereIn('products.id',$productIds);
                 }
-
-                // checking for Color
+                // Checking for color
                 if(isset($data['color']) && !empty($data['color'])){
                     $productIds = Product::select('id')->whereIn('product_color',$data['color'])->pluck('id')->toArray();
                     $categoryProducts->whereIn('products.id',$productIds);
                 }
-
-                // checking for Price
-                /*if(isset($data['price']) && !empty($data['price'])){
-                    foreach ($data['price'] as $key => $price) {
-                        $priceArr = explode("-",$price);
-                        $productIds[] = Product::select('id')->whereBetween('product_price',[$priceArr[0],$priceArr[1]])->pluck('id')->toArray();
-                    }
-                    $productIds = call_user_func_array('array_merge', $productIds);
-                    $categoryProducts->whereIn('products.id',$productIds);
-                }*/
-
-                // checking for Price
+                // Checking for price
                 $productIds = array();
                 if(isset($data['price']) && !empty($data['price'])){
                     foreach ($data['price'] as $key => $price) {
                         $priceArr = explode("-",$price);
                         if(isset($priceArr[0]) && isset($priceArr[1])){
-                            $productIds[] = Product::select('id')->whereBetween('product_price',[$priceArr[0],$priceArr[1]])->pluck('id')->toArray();    
+                            $productIds[] = Product::select('id')->whereBetween('product_price',[$priceArr[0],$priceArr[1]])->pluck('id')->toArray();
                         }
                     }
                     $productIds = array_unique(array_flatten($productIds));
                     $categoryProducts->whereIn('products.id',$productIds);
                 }
-
-                // checking for Brand
+                // Checking for brand
                 if(isset($data['brand']) && !empty($data['brand'])){
                     $productIds = Product::select('id')->whereIn('brand_id',$data['brand'])->pluck('id')->toArray();
                     $categoryProducts->whereIn('products.id',$productIds);
@@ -119,45 +104,46 @@ class ProductsController extends Controller
             }
 
         }else{
+            // Search products
             if(isset($_REQUEST['search']) && !empty($_REQUEST['search'])){
                 if($_REQUEST['search']=="new-arrivals"){
                     $search_product = $_REQUEST['search'];
-                    $categoryDetails['breadcrumbs'] = "New Arrival Products";      
-                    $categoryDetails['categoryDetails']['category_name'] = "New Arrival Products";      
-                    $categoryDetails['categoryDetails']['description'] = "New Arrival Products";   
+                    $categoryDetails['breadcrumbs'] = "New Arrival Products";
+                    $categoryDetails['categoryDetails']['category_name'] = "New Arrival Products";
+                    $categoryDetails['categoryDetails']['description'] = "New Arrival Products";
                     $categoryProducts = Product::select('products.id','products.section_id','products.category_id','products.brand_id','products.vendor_id','products.product_name','products.product_code','products.product_color','products.product_price','products.product_discount','products.product_image','products.description')->with('brand')->join('categories','categories.id','=','products.category_id')->where('products.status',1)->orderby('id','Desc');   
                 }else if($_REQUEST['search']=="best-sellers"){
                     $search_product = $_REQUEST['search'];
-                    $categoryDetails['breadcrumbs'] = "Best Sellers Products";      
-                    $categoryDetails['categoryDetails']['category_name'] = "Best Sellers Products";      
-                    $categoryDetails['categoryDetails']['description'] = "Best Sellers Products";   
+                    $categoryDetails['breadcrumbs'] = "Best Sellers Products";
+                    $categoryDetails['categoryDetails']['category_name'] = "Best Sellers Products";
+                    $categoryDetails['categoryDetails']['description'] = "Best Sellers Products";
                     $categoryProducts = Product::select('products.id','products.section_id','products.category_id','products.brand_id','products.vendor_id','products.product_name','products.product_code','products.product_color','products.product_price','products.product_discount','products.product_image','products.description')->with('brand')->join('categories','categories.id','=','products.category_id')->where('products.status',1)->where('products.is_bestseller','Yes');   
                 }else if($_REQUEST['search']=="featured"){
                     $search_product = $_REQUEST['search'];
-                    $categoryDetails['breadcrumbs'] = "Featured Products";      
-                    $categoryDetails['categoryDetails']['category_name'] = "Featured Products";      
-                    $categoryDetails['categoryDetails']['description'] = "Featured Products";   
+                    $categoryDetails['breadcrumbs'] = "Featured Products";
+                    $categoryDetails['categoryDetails']['category_name'] = "Featured Products";
+                    $categoryDetails['categoryDetails']['description'] = "Featured Products";
                     $categoryProducts = Product::select('products.id','products.section_id','products.category_id','products.brand_id','products.vendor_id','products.product_name','products.product_code','products.product_color','products.product_price','products.product_discount','products.product_image','products.description')->with('brand')->join('categories','categories.id','=','products.category_id')->where('products.status',1)->where('products.is_featured','Yes');   
                 }else if($_REQUEST['search']=="discounted"){
                     $search_product = $_REQUEST['search'];
-                    $categoryDetails['breadcrumbs'] = "Discounted Products";      
-                    $categoryDetails['categoryDetails']['category_name'] = "Discounted Products";      
-                    $categoryDetails['categoryDetails']['description'] = "Discounted Products";   
+                    $categoryDetails['breadcrumbs'] = "Discounted Products";
+                    $categoryDetails['categoryDetails']['category_name'] = "Discounted Products";
+                    $categoryDetails['categoryDetails']['description'] = "Discounted Products";
                     $categoryProducts = Product::select('products.id','products.section_id','products.category_id','products.brand_id','products.vendor_id','products.product_name','products.product_code','products.product_color','products.product_price','products.product_discount','products.product_image','products.description')->with('brand')->join('categories','categories.id','=','products.category_id')->where('products.status',1)->where('products.product_discount','>',0);   
                 }else{
                     $search_product = $_REQUEST['search'];
-                    $categoryDetails['breadcrumbs'] = $search_product;      
-                    $categoryDetails['categoryDetails']['category_name'] = $search_product;      
-                    $categoryDetails['categoryDetails']['description'] = "Search Product for ". $search_product;   
+                    $categoryDetails['breadcrumbs'] = $search_product;
+                    $categoryDetails['categoryDetails']['category_name'] = $search_product;
+                    $categoryDetails['categoryDetails']['description'] = "Search Product for ". $search_product;
                     $categoryProducts = Product::select('products.id','products.section_id','products.category_id','products.brand_id','products.vendor_id','products.product_name','products.product_code','products.product_color','products.product_price','products.product_discount','products.product_image','products.description')->with('brand')->join('categories','categories.id','=','products.category_id')->where(function($query)use($search_product){
                             $query->where('products.product_name','like','%'.$search_product.'%')
                             ->orWhere('products.product_code','like','%'.$search_product.'%')
                             ->orWhere('products.product_color','like','%'.$search_product.'%')
                             ->orWhere('products.description','like','%'.$search_product.'%')
                             ->orWhere('categories.category_name','like','%'.$search_product.'%');
-                    })->where('products.status',1);    
+                    })->where('products.status',1);
                 }
-                  
+
                 if(isset($_REQUEST['section_id']) && !empty($_REQUEST['section_id'])){
                     $categoryProducts = $categoryProducts->where('products.section_id',$_REQUEST['section_id']); 
                 }
@@ -168,11 +154,11 @@ class ProductsController extends Controller
                 $url = Route::getFacadeRoot()->current()->uri();
                 $categoryCount = Category::where(['url'=>$url,'status'=>1])->count();
                 if($categoryCount>0){
-                    // Get Category Details
-                    $categoryDetails = Category::categoryDetails($url);            
+                    // Get category details
+                    $categoryDetails = Category::categoryDetails($url);
                     $categoryProducts = Product::with('brand')->whereIn('category_id',$categoryDetails['catIds'])->where('status',1);
 
-                    // checking for Sort
+                    // Checking for sort
                     if(isset($_GET['sort']) && !empty($_GET['sort'])){
                         if($_GET['sort']=="product_latest"){
                             $categoryProducts->orderby('products.id','Desc');
@@ -186,7 +172,6 @@ class ProductsController extends Controller
                             $categoryProducts->orderby('products.product_name','Asc');
                         }
                     }
-
                     $categoryProducts = $categoryProducts->paginate(30);
                     /*dd($categoryDetails);*/
                     /*echo "Category exists"; die;*/
@@ -196,16 +181,15 @@ class ProductsController extends Controller
                     return view('front.products.listing')->with(compact('categoryDetails','categoryProducts','url','meta_title','meta_description','meta_keywords'));
                 }else{
                     abort(404);
-                }    
+                }
             }
-        }  
+        }
     }
 
     public function vendorListing($vendorid){
-        // Get Vendor Shop Name
+        // Get vendor shop name
         $getVendorShop = Vendor::getVendorShop($vendorid);
-
-        // Get Vendor Products
+        // Get vendor products
         $vendorProducts = Product::with('brand')->where('vendor_id',$vendorid)->where('status',1);
         $vendorProducts = $vendorProducts->paginate(30);
         return view('front.products.vendor_listing')->with(compact('getVendorShop','vendorProducts'));
@@ -216,12 +200,10 @@ class ProductsController extends Controller
             $query->where('stock','>',0)->where('status',1);
         },'images','vendor'])->find($id)->toArray();
         $categoryDetails = Category::categoryDetails($productDetails['category']['url']);
-
-        // Get Similar Products
+        // Get similar products
         $similarProducts = Product::with('brand')->where('category_id',$productDetails['category']['id'])->where('id','!=',$id)->limit(4)->inRandomOrder()->get()->toArray();
         /*dd($similarProducts);*/
-
-        // Set Session for Recently Viewed Products
+        // Set Session for recently viewed products
         if(empty(Session::get('session_id'))){
             $session_id = md5(uniqid(rand(), true));
         }else{
@@ -236,36 +218,37 @@ class ProductsController extends Controller
             DB::table('recently_viewed_products')->insert(['product_id'=>$id,'session_id'=>$session_id]);
         }
 
-        // Get Recently Viewed Products Ids
+        // Get recently viewed products IDs
         $recentProductsIds = DB::table('recently_viewed_products')->select('product_id')->where('product_id','!=',$id)->where('session_id',$session_id)->inRandomOrder()->get()->take(4)->pluck('product_id');
         /*dd($recentProductsIds);*/
 
 
-        // Get Recently Viewed Products
+        // Get recently viewed products
         $recentlyViewedProducts = Product::with('brand')->whereIn('id',$recentProductsIds)->get()->toArray();
         /*dd($recentlyViewedProducts);*/
 
-        // Get Group Products (Product Colors)
+        // Get group products (Product Colors)
         $groupProducts = array();
         if(!empty($productDetails['group_code'])){
             $groupProducts = Product::select('id','product_image')->where('id','!=',$id)->where(['group_code'=>$productDetails['group_code'],'status'=>1])->get()->toArray();
             /*dd($groupProducts);*/
         }
 
-        // Get All Ratings of product 
+        // Get all ratings of product
         $ratings = Rating::with('user')->where(['product_id'=>$id,'status'=>1])->get()->toArray();
-        
-        // Get Average Rating of product
+
+        // Get average rating of product
         $ratingSum = Rating::where(['product_id'=>$id,'status'=>1])->sum('rating');
         $ratingCount = Rating::where(['product_id'=>$id,'status'=>1])->count();
 
-        // Get Star Rating
+        // Get star rating
         $ratingOneStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>1])->count();
         $ratingTwoStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>2])->count();
         $ratingThreeStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>3])->count();
         $ratingFourStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>4])->count();
         $ratingFiveStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>5])->count();
 
+        // Compute average rating
         $avgRating = 0;
         $avgStarRating = 0;
         if($ratingCount>0){
@@ -273,6 +256,7 @@ class ProductsController extends Controller
             $avgStarRating = round($ratingSum/$ratingCount);
         }
 
+        // Calculate total stock
         $totalStock = ProductsAttribute::where('product_id',$id)->sum('stock');
         $meta_title = $productDetails['meta_title'];
         $meta_description = $productDetails['meta_description'];
@@ -286,11 +270,11 @@ class ProductsController extends Controller
         },'images','vendor'])->find($id)->toArray();
         $categoryDetails = Category::categoryDetails($productDetails['category']['url']);
 
-        // Get Similar Products
+        // Get similar products
         $similarProducts = Product::with('brand')->where('category_id',$productDetails['category']['id'])->where('id','!=',$id)->limit(4)->inRandomOrder()->get()->toArray();
         /*dd($similarProducts);*/
 
-        // Set Session for Recently Viewed Products
+        // Set session for recently viewed products
         if(empty(Session::get('session_id'))){
             $session_id = md5(uniqid(rand(), true));
         }else{
@@ -299,42 +283,43 @@ class ProductsController extends Controller
 
         Session::put('session_id',$session_id);
 
-        // Insert product in table if not already exists
+        // Insert product in table if does not already exists
         $countRecentlyViewedProducts = DB::table('recently_viewed_products')->where(['product_id'=>$id,'session_id'=>$session_id])->count();
         if($countRecentlyViewedProducts==0){
             DB::table('recently_viewed_products')->insert(['product_id'=>$id,'session_id'=>$session_id]);
         }
 
-        // Get Recently Viewed Products Ids
+        // Get recently viewed products IDs
         $recentProductsIds = DB::table('recently_viewed_products')->select('product_id')->where('product_id','!=',$id)->where('session_id',$session_id)->inRandomOrder()->get()->take(4)->pluck('product_id');
         /*dd($recentProductsIds);*/
 
 
-        // Get Recently Viewed Products
+        // Get recently viewed products
         $recentlyViewedProducts = Product::with('brand')->whereIn('id',$recentProductsIds)->get()->toArray();
         /*dd($recentlyViewedProducts);*/
 
-        // Get Group Products (Product Colors)
+        // Get group products (Product Colors)
         $groupProducts = array();
         if(!empty($productDetails['group_code'])){
             $groupProducts = Product::select('id','product_image')->where('id','!=',$id)->where(['group_code'=>$productDetails['group_code'],'status'=>1])->get()->toArray();
             /*dd($groupProducts);*/
         }
 
-        // Get All Ratings of product 
+        // Get all ratings of product
         $ratings = Rating::with('user')->where(['product_id'=>$id,'status'=>1])->get()->toArray();
-        
-        // Get Average Rating of product
+
+        // Get average rating of product
         $ratingSum = Rating::where(['product_id'=>$id,'status'=>1])->sum('rating');
         $ratingCount = Rating::where(['product_id'=>$id,'status'=>1])->count();
 
-        // Get Star Rating
+        // Get star rating
         $ratingOneStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>1])->count();
         $ratingTwoStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>2])->count();
         $ratingThreeStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>3])->count();
         $ratingFourStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>4])->count();
         $ratingFiveStarCount = Rating::where(['product_id'=>$id,'status'=>1,'rating'=>5])->count();
 
+        // Get average rating
         $avgRating = 0;
         $avgStarRating = 0;
         if($ratingCount>0){
@@ -342,6 +327,7 @@ class ProductsController extends Controller
             $avgStarRating = round($ratingSum/$ratingCount);
         }
 
+        // Calculate total stock
         $totalStock = ProductsAttribute::where('product_id',$id)->sum('stock');
         $meta_title = $productDetails['meta_title'];
         $meta_description = $productDetails['meta_description'];
@@ -349,13 +335,14 @@ class ProductsController extends Controller
         return view('front.products.detail')->with(compact('productDetails','categoryDetails','totalStock','similarProducts','recentlyViewedProducts','groupProducts','meta_title','meta_description','meta_keywords','ratings','avgRating','avgStarRating','ratingOneStarCount','ratingTwoStarCount','ratingThreeStarCount','ratingFourStarCount','ratingFiveStarCount'));
     }
 
+    // Get product prices
     public function getProductPrice(Request $request){
         if($request->ajax()){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
             $getDiscountAttributePrice = Product::getDiscountAttributePrice($data['product_id'],$data['size']);
             /*echo "<pre>"; print_r($getDiscountAttributePrice); die;*/
-            // echo "<pre>"; print_r($getDiscountAttributePrice); die;
+            // Calculate final price
             if($data['currency']!="PHP"){
                 $getCurrency = Currency::where('currency_code',$data['currency'])->first()->toArray();
                 $getDiscountAttributePrice['product_price'] =  round($getDiscountAttributePrice['product_price']/$getCurrency['exchange_rate'],2);
@@ -379,20 +366,20 @@ class ProductsController extends Controller
                 $data['quantity']=1;
             }
 
-            // Check Product Stock is available or not
+            // Check product stock is available or not
             $getProductStock = ProductsAttribute::getProductStock($data['product_id'],$data['size']);
             if($getProductStock<$data['quantity']){
                 return redirect()->back()->with('error_message','Required Quantity is not available!');
             }
 
-            // Generate Session Id if not exists
+            // Generate session ID if not exists
             $session_id = Session::get('session_id');
             if(empty($session_id)){
                 $session_id = Session::getId();
                 Session::put('session_id',$session_id);
             }
 
-            // Check Product if already exists in the User Cart
+            // Check product if already exists in the user cart
             if(Auth::check()){
                 // User is logged in
                 $user_id = Auth::user()->id;
@@ -407,7 +394,7 @@ class ProductsController extends Controller
                 return redirect()->back()->with('error_message','Product already exists in Cart!');
             }
 
-            // Save Product in carts table
+            // Save product in carts table
             $item = new Cart;
             $item->session_id = $session_id;
             $item->user_id = $user_id;
@@ -419,6 +406,7 @@ class ProductsController extends Controller
         }
     }
 
+    // Display cart
     public function cart(){
         $getCartItems = Cart::getCartItems();
         /*dd($getCartItems);*/
@@ -427,6 +415,7 @@ class ProductsController extends Controller
         return view('front.products.cart')->with(compact('getCartItems','meta_title','meta_keywords'));
     }
 
+    // Update cart
     public function cartUpdate(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -436,15 +425,15 @@ class ProductsController extends Controller
             Session::forget('couponAmount');
             Session::forget('couponCode');
 
-            // Get Cart Details
+            // Get cart details
             $cartDetails = Cart::find($data['cartid']);
 
-            // Get Available Product Stock
+            // Get available product stock
             $availableStock = ProductsAttribute::select('stock')->where(['product_id'=>$cartDetails['product_id'],'size'=>$cartDetails['size']])->first()->toArray();
 
             /*echo "<pre>"; print_r($availableStock); die;*/
 
-            // Check if desired Stock from user is available
+            // Check if desired stock from user is available
             if($data['qty']>$availableStock['stock']){
                 $getCartItems = Cart::getCartItems();
                 return response()->json([
@@ -452,7 +441,7 @@ class ProductsController extends Controller
                     'message'=>'Product Stock is not available',
                     'view'=>(String)View::make('front.products.cart_items')->with(compact('getCartItems')),
                     'headerview'=>(String)View::make('front.layout.header_cart_items')->with(compact('getCartItems'))
-                ]);    
+                ]);
             }
 
             // Check if product size is available
@@ -464,10 +453,10 @@ class ProductsController extends Controller
                     'message'=>'Product Size is not available. Please remove this Product and choose another one!',
                     'view'=>(String)View::make('front.products.cart_items')->with(compact('getCartItems')),
                     'headerview'=>(String)View::make('front.layout.header_cart_items')->with(compact('getCartItems'))
-                ]);    
+                ]);
             }
 
-            // Update the Qty
+            // Update the quantity
             Cart::where('id',$data['cartid'])->update(['quantity'=>$data['qty']]);
             $getCartItems = Cart::getCartItems();
             /*dd($getCartItems);*/
@@ -485,26 +474,24 @@ class ProductsController extends Controller
         }
     }
 
+    // Delete cart item
     public function cartDelete(Request $request){
         if($request->ajax()){
             Session::forget('couponAmount');
             Session::forget('couponCode');
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
             // Forget the coupon sessions
             Session::forget('couponAmount');
             Session::forget('couponCode');
-            
             Cart::where('id',$data['cartid'])->delete();
             $getCartItems = Cart::getCartItems();
             $totalCartItems = totalCartItems();
             if(!empty($data['currency'])){
-                $currency = $data['currency'];    
+                $currency = $data['currency'];
             }else{
                 $currency = "PHP";
             }
-            
             return response()->json([
                 'totalCartItems'=>$totalCartItems,
                 'currency'=>$currency,
@@ -514,6 +501,7 @@ class ProductsController extends Controller
         }
     }
 
+    // Apply coupons
     public function applyCoupon(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -523,6 +511,7 @@ class ProductsController extends Controller
             $getCartItems = Cart::getCartItems();
             $totalCartItems = totalCartItems();
             $couponCount = Coupon::where('coupon_code',$data['code'])->count();
+            // Check if the coupon is valid
             if($couponCount==0){
                 return response()->json([
                 'status'=>false,
@@ -534,7 +523,7 @@ class ProductsController extends Controller
             }else{
                 // Check for other coupon conditions
 
-                // Get Coupon Details
+                // Get coupon details
                 $couponDetails = Coupon::where('coupon_code',$data['code'])->first();
 
                 // Check if coupon is active
@@ -591,18 +580,15 @@ class ProductsController extends Controller
                                 $message = "This coupon code is not for you. Try with valid coupon code!";
                             }
                         }
-                    }   
+                    }
                 }
-                
-
                 if($couponDetails->vendor_id>0){
                     $productIds = Product::select('id')->where('vendor_id',$couponDetails->vendor_id)->pluck('id')->toArray();
-                    // Check if coupon belongs to Vendor products
+                    // Check if coupon belongs to vendor products
                     foreach ($getCartItems as $item) {
                         if(!in_array($item['product']['id'],$productIds)){
                                 $message = "This coupon code is not for you. Try with valid coupon code!";
-                            }
-
+                        }
                     }
                 }
 
@@ -616,7 +602,7 @@ class ProductsController extends Controller
                     'headerview'=>(String)View::make('front.layout.header_cart_items')->with(compact('getCartItems'))
                     ]);
                 }else{
-                    // Coupon code is correct 
+                    // Coupon code is correct
 
                     // Check if Coupon Amount type is Fixed or Percentage
                     if($couponDetails->amount_type=="Fixed"){
@@ -627,7 +613,7 @@ class ProductsController extends Controller
 
                     $grand_total = $total_amount - $couponAmount;
 
-                    // Add Coupon Code & Amount in Session Variables
+                    // Add coupon code & amount in session variables
                     Session::put('couponAmount',$couponAmount);
                     Session::put('couponCode',$data['code']);
 
@@ -647,20 +633,19 @@ class ProductsController extends Controller
             }
         }
     }
-    
 
+    // Handle checkout process
     public function checkout(Request $request){
-
         $countries = Country::where('status',1)->get()->toArray();
         $barangay = Barangay::all()->toArray();
         $getCartItems = Cart::getCartItems();
         /*dd($getCartItems);*/
-
+        // Check the cart is not empty
         if(count($getCartItems)==0){
             $message = "Shopping Cart is empty! Please add products to checkout";
             return redirect('cart')->with('error_message',$message);
         }
-
+        // Calculate final price
         $total_price = 0;
         $total_weight = 0;
         foreach ($getCartItems as $item) {
@@ -670,29 +655,22 @@ class ProductsController extends Controller
             $product_weight = $item['product']['product_weight'];
             $total_weight = $total_weight+$product_weight;
         }
-
         $deliveryAddresses = DeliveryAddress::deliveryAddresses();
         foreach ($deliveryAddresses as $key => $value) {
             $shippingCharges = ShippingCharge::getShippingCharges($total_weight,$value['barangay']);
             $deliveryAddresses[$key]['shipping_charges'] = $shippingCharges;
-
-            // COD Pincode is Available or Not
+            // COD pincode is available or not
             $deliveryAddresses[$key]['codpincodeCount'] = DB::table('cod_pincodes')->where('pincode',$value['pincode'])->count();
-
-            // Prepaid Pincode is Available or Not
+            // Prepaid pincode is available or Not
             $deliveryAddresses[$key]['prepaidpincodeCount'] = DB::table('prepaid_pincodes')->where('pincode',$value['pincode'])->count();
         }
         /*dd($deliveryAddresses);*/
-
-        
-
         if($request->isMethod('post')){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
-            // Website Security
+            // Website security
             foreach ($getCartItems as $item) {
-                // Prevent Disabled Products to Order
+                // Prevent disabled products to order
                 $product_status = Product::getProductStatus($item['product_id']);
                 if($product_status==0){
                     /*Product::deleteCartProduct($item['product_id']);
@@ -700,48 +678,45 @@ class ProductsController extends Controller
                     $message = $item['product']['product_name']." with ".$item['size']." Size is not available. Please remove from cart and choose some other product.";
                     return redirect('/cart')->with('error_message',$message);
                 }
-
-                // Prevent Sold Out Products to Order
+                // Prevent sold out products to order
                 $getProductStock = ProductsAttribute::getProductStock($item['product_id'],$item['size']);
                 if($getProductStock==0){
                     /*Product::deleteCartProduct($item['product_id']);
                     $message = "One of the product is sold out! Please try again.";*/
                     $message = $item['product']['product_name']." with ".$item['size']." Size is not available. Please remove from cart and choose some other product.";
-                    return redirect('/cart')->with('error_message',$message);    
+                    return redirect('/cart')->with('error_message',$message);
                 }
-
-                // Prevent Disabled Attributes to Order
+                // Prevent disabled attributes to order
                 $getAttributeStatus = ProductsAttribute::getAttributeStatus($item['product_id'],$item['size']);
                 if($getAttributeStatus==0){
                     /*Product::deleteCartProduct($item['product_id']);
                     $message = "One of the product attribute is disabled! Please try again.";*/
                     $message = $item['product']['product_name']." with ".$item['size']." Size is not available. Please remove from cart and choose some other product.";
-                    return redirect('/cart')->with('error_message',$message);    
+                    return redirect('/cart')->with('error_message',$message);
                 }
-
-                // Prevent Disabled Categories Products to Order
+                // Prevent disabled categories products to order
                 $getCategoryStatus = Category::getCategoryStatus($item['product']['category_id']);
                 if($getCategoryStatus==0){
                     //Product::deleteCartProduct($item['product_id']);
                     //$message = "One of the product is disabled! Please try again.";
                     $message = $item['product']['product_name']." with ".$item['size']." Size is not available. Please remove from cart and choose some other product.";
-                    return redirect('/cart')->with('error_message',$message);    
+                    return redirect('/cart')->with('error_message',$message);
                 }
             }
 
-            // Delivery Address Validation
+            // Delivery address validation
             if(empty($data['address_id'])){
                 $message = "Please select Delivery Address!";
                 return redirect()->back()->with('error_message',$message);
             }
 
-            // Payment Method Validation
+            // Payment method validation
             if(empty($data['payment_gateway'])){
                 $message = "Please select Payment Method!";
                 return redirect()->back()->with('error_message',$message);
             }
 
-            // Agree to T&C Validation
+            // Agree to T&C validation
             if(empty($data['accept'])){
                 $message = "Please agree to T&C!";
                 return redirect()->back()->with('error_message',$message);
@@ -749,11 +724,11 @@ class ProductsController extends Controller
 
             /*echo "<pre>"; print_r($data); die;*/
 
-            // Get Delivery Address from address_id
+            // Get delivery address from address_id
             $deliveryAddress = DeliveryAddress::where('id',$data['address_id'])->first()->toArray();
             /*dd($deliveryAddress);*/
 
-            // Set Payment Method as COD if COD is selected from user otherwise set as Prepaid
+            // Set payment M=method as COD if COD is selected from user otherwise set as Prepaid
             if($data['payment_gateway']=="COD"){
                 $payment_method = "COD";
                 $order_status = "New";
@@ -764,26 +739,26 @@ class ProductsController extends Controller
 
             DB::beginTransaction();
 
-            // Fetch Order Total Price
+            // Fetch order total price
             $total_price = 0;
             foreach($getCartItems as $item){
                 $getDiscountAttributePrice = Product::getDiscountAttributePrice($item['product_id'],$item['size']);
                 $total_price = $total_price + ($getDiscountAttributePrice['final_price'] * $item['quantity']);
             }
 
-            // Calculate Shipping Charges
+            // Calculate shipping harges
             $shipping_charges = 0;
 
-            // Get Shipping Charges
+            // Get shipping charges
             $shipping_charges = ShippingCharge::getShippingCharges($total_weight,$deliveryAddress['barangay']);
 
-            // Calculate Grand Total
+            // Calculate grand total
             $grand_total = $total_price + $shipping_charges - Session::get('couponAmount');
 
-            // Insert Grand Total in Session Variable
+            // Insert grand total in session variable
             Session::put('grand_total',$grand_total);
 
-            // Insert Order Details
+            // Insert order details
             $order = new Order;
             $order->user_id = Auth::user()->id;
             $order->name = $deliveryAddress['name'];
@@ -806,6 +781,7 @@ class ProductsController extends Controller
 
             $vendorCommission = 0;
 
+            // Set cart informations
             foreach($getCartItems as $item){
                 $cartItem = new OrdersProduct;
                 $cartItem->order_id = $order_id;
@@ -837,23 +813,19 @@ class ProductsController extends Controller
                 $cartItem->product_qty = $item['quantity'];
                 $cartItem->save();
 
-                // Reduce Stock Script Starts
+                // Reduce stock script starts
                 $getProductStock = ProductsAttribute::getProductStock($item['product_id'],$item['size']);
                 $newStock = $getProductStock - $item['quantity'];
                 ProductsAttribute::where(['product_id'=>$item['product_id'],'size'=>$item['size']])->update(['stock'=>$newStock]);
                 // Reduce Stock Script Ends
             }
 
-            // Insert Order Id in Session variable
+            // Insert order ID in session variable
             Session::put('order_id',$order_id);
-
             DB::commit();
-
             $orderDetails = Order::with('orders_products')->where('id',$order_id)->first()->toArray();
-
             if($data['payment_gateway']=="COD"){
-                
-                // Send Order Email
+                // Send order email
                 $email = Auth::user()->email;
                 $messageData = [
                     'email' => $email,
@@ -864,26 +836,14 @@ class ProductsController extends Controller
                 Mail::send('emails.order',$messageData,function($message)use($email){
                     $message->to($email)->subject('Order Placed - WMSU TBI');
                 });
-
-                // Send Order SMS
-                /*$message = "Dear Customer, your order ".$order_id." has been successfully placed with StackDevelopers.in. We will intimate you once your order is shipped.";
-                $mobile = Auth::user()->mobile;
-                Sms:sendSms($message,$mobile);*/
-
-
             }else if($data['payment_gateway']=="ONLINE"){
 
                 return redirect()->route('gcash.pay');
             } else{
                 echo "Other Prepaid payment methods coming soon";
             }
-
-            
             return redirect('thanks');
-
         }
-
-        
         return view('front.products.checkout')->with(compact('deliveryAddresses','countries','getCartItems','total_price', 'barangay'));
     }
 
@@ -900,13 +860,10 @@ class ProductsController extends Controller
     public function checkPincode(Request $request){
         if($request->isMethod('post')){
             $data = $request->all();
-
-            // COD Pincode is Available or Not
+            // COD pincode is available or not
             $codPincodeCount = DB::table('cod_pincodes')->where('pincode',$data['pincode'])->count();
-
-            // Prepaid Pincode is Available or Not
+            // Prepaid pincode is available or not
             $prepaidPincodeCount = DB::table('prepaid_pincodes')->where('pincode',$data['pincode'])->count();
-
             if($codPincodeCount==0 && $prepaidPincodeCount==0){
                 echo "This pincode is not available for Delivery";
             }else{
