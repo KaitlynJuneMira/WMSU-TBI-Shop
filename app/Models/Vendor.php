@@ -13,11 +13,13 @@ class Vendor extends Model
         return $this->belongsTo('App\Models\VendorsBusinessDetail','id','vendor_id');
     }
 
+    // Get vendor vendor shop name
     public static function getVendorShop($vendorid){
         $getVendorShop = VendorsBusinessDetail::select('shop_name')->where('vendor_id',$vendorid)->first()->toArray();
         return $getVendorShop['shop_name'];
     }
 
+    // Get vendor commission
     public static function getVendorCommission($vendorid){
         $vendorCommissionCount = Vendor::where('id',$vendorid)->count();
         if($vendorCommissionCount>0){

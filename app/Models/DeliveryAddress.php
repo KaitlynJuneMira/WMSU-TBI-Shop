@@ -14,6 +14,7 @@ class DeliveryAddress extends Model
         'user_id','name','address','city','barangay','country','pincode','status','mobile'
     ];
 
+    // Get delivery addresses
     public static function deliveryAddresses(){
         $deliveryAddresses = DeliveryAddress::where('user_id',Auth::user()->id)->get()->toArray();
         return $deliveryAddresses;

@@ -9,6 +9,7 @@ class Coupon extends Model
 {
     use HasFactory;
 
+    // Fetch coupon details
     public static function couponDetails($coupon_code){
         $couponDetails = Coupon::where('coupon_code',$coupon_code)->first()->toArray();
         return $couponDetails;

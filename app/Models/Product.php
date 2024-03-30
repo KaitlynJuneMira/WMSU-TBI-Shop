@@ -33,6 +33,7 @@ class Product extends Model
         return $this->belongsTo('App\Models\Vendor','vendor_id')->with('vendorbusinessdetails');
     }
 
+    // Get discount price
     public static function getDiscountPrice($product_id){
         $proDetails = Product::select('product_price','product_discount','category_id')->where('id',$product_id)->first();
         $proDetails = json_decode(json_encode($proDetails),true);
@@ -42,7 +43,6 @@ class Product extends Model
         if($proDetails['product_discount']>0){
             // If product discount is added from the admin panel
             $discounted_price = $proDetails['product_price'] - ($proDetails['product_price']*$proDetails['product_discount']/100);
-
 
         }else if($catDetails['category_discount']>0){
             // If product discount is not added but category discount added from the admin panel
@@ -54,6 +54,7 @@ class Product extends Model
         return $discounted_price;
     }
 
+    // Get discount attribute price
     public static function getDiscountAttributePrice($product_id,$size){
         $proAttrPrice = ProductsAttribute::where(['product_id'=>$product_id,'size'=>$size])->first()->toArray();
         $proDetails = Product::select('product_discount','category_id')->where('id',$product_id)->first();
@@ -76,6 +77,7 @@ class Product extends Model
         return array('product_price'=>$proAttrPrice['price'],'final_price'=>$final_price,'discount'=>$discount);
     }
 
+    // Display new products
     public static function isProductNew($product_id){
         // Get Last 3 Products
         $productIds = Product::select('id')->where('status',1)->orderby('id','Desc')->limit(3)->pluck('id');
@@ -89,16 +91,19 @@ class Product extends Model
         return $isProductNew;
     }
 
+    // Fetch product image
     public static function getProductImage($product_id){
         $getProductImage = Product::select('product_image')->where('id',$product_id)->first()->toArray();
         return $getProductImage['product_image'];
     }
 
+    // Fetch product status
     public static function getProductStatus($product_id){
         $getProductStatus = Product::select('status')->where('id',$product_id)->first();
         return $getProductStatus->status;
     }
 
+    // Delete product from cart
     public static function deleteCartProduct($product_id){
         Cart::where('product_id',$product_id)->delete();
     }

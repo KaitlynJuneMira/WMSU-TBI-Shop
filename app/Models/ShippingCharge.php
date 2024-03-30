@@ -9,6 +9,7 @@ class ShippingCharge extends Model
 {
     use HasFactory;
 
+    // Get shipping charges
     public static function getShippingCharges($total_weight,$country){
         $shippingDetails = ShippingCharge::where('barangay',$country)->first()->toArray();
         if($total_weight>0){

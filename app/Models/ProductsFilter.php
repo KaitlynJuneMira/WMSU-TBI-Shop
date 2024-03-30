@@ -9,21 +9,25 @@ class ProductsFilter extends Model
 {
     use HasFactory;
 
+    // Get products filter name
     public static function getFilterName($filter_id){
         $getFilterName = ProductsFilter::select('filter_name')->where('id',$filter_id)->first();
         return $getFilterName->filter_name;
     }
 
+    // Get products filter values
     public function filter_values(){
         return $this->hasMany('App\Models\ProductsFiltersValue','filter_id');
     }
 
+    // Get product filters
     public static function productFilters(){
         $productFilters = ProductsFilter::with('filter_values')->where('status',1)->get()->toArray();
         /*dd($productFilters);*/
         return $productFilters;
     }
 
+    // Display product filter availability
     public static function filterAvailable($filter_id,$category_id){
         $filterAvailable = ProductsFilter::select('cat_ids')->where(['id'=>$filter_id,'status'=>1])->first()->toArray();
         $catIdsArr = explode(",",$filterAvailable['cat_ids']);
@@ -35,6 +39,7 @@ class ProductsFilter extends Model
         return $available;
     }
 
+    // Get product sizes
     public static function getSizes($url){
         $categoryDetails = Category::categoryDetails($url);
         $getProductIds = Product::select('id')->whereIn('category_id',$categoryDetails['catIds'])->pluck('id')->toArray();
@@ -43,6 +48,7 @@ class ProductsFilter extends Model
         return $getProductSizes;
     }
 
+    // Get product colors
     public static function getColors($url){
         $categoryDetails = Category::categoryDetails($url);
         $getProductIds = Product::select('id')->whereIn('category_id',$categoryDetails['catIds'])->pluck('id')->toArray();
@@ -51,6 +57,7 @@ class ProductsFilter extends Model
         return $getProductColors;
     }
 
+    // Get brand details
     public static function getBrands($url){
         $categoryDetails = Category::categoryDetails($url);
         $getProductIds = Product::select('id')->whereIn('category_id',$categoryDetails['catIds'])->pluck('id')->toArray();
