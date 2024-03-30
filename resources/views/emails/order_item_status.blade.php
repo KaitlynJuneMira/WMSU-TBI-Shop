@@ -7,7 +7,7 @@
 <body>
 	<table style="width:700px;">
 		<tr><td>&nbsp;</td></tr>
-		<tr><td><img src="{{ asset('front/images/main-logo/stack-developers-logo.png') }}"></td></tr>
+		<tr><td><img src="{{ asset('front/images/main-logo/wmsu-tbi-logo.png') }}"></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr><td>Hello {{$name}}</td></tr>
 		<tr><td>&nbsp;</td></tr>

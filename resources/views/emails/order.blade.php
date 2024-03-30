@@ -8,15 +8,6 @@
 <body style="font-family: Arial, sans-serif;">
 
     <table style="width:700px;">
-        <!-- <tr>
-            <td>&nbsp;</td>
-        </tr>
-        <tr>
-            <td><img src="{{ asset('front/images/main-logo/stack-developers-logo.png') }}" alt="WMSU TBI Shop Logo"></td>
-        </tr>
-        <tr>
-            <td>&nbsp;</td>
-        </tr> -->
         <tr>
             <td>Hello {{$name}},</td>
         </tr>
