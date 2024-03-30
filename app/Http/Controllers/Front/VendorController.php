@@ -20,11 +20,11 @@ class VendorController extends Controller
         return view('front.vendors.login_register');
     }
 
+    // Vendor registration
     public function vendorRegister(Request $request){
         if($request->isMethod('post')){
             $data = $request->all();
-    
-            // Validate Vendor 
+            // Enter validation
             $rules = [
                 "first_name" => 'required|regex:/^[a-zA-Z\s]+$/|max:100',
                 "last_name" => 'required|regex:/^[a-zA-Z\s]+$/|max:100',
@@ -43,7 +43,7 @@ class VendorController extends Controller
                 'shop_dti_id' => 'required',
 
             ];
-    
+            // Custom error messages
             $customMessages = [
                 "first_name.required" => "First name is required.",
                 "last_name.required" => "Last name is required.",
@@ -69,39 +69,37 @@ class VendorController extends Controller
                 'shop_dti_id.required' => 'DTI Permit is Required',
 
             ];
-    
+
             $validator = Validator::make($data, $rules, $customMessages);
-    
+
             if($validator->fails()){
                 return Redirect::back()->withErrors($validator);
             }
-            
-    
+
             DB::beginTransaction();
-    
+
             // Concatenate first name, last name, and middle initial
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
             if(isset($data['middle_initial']) && !empty($data['middle_initial'])) {
                 $fullName .= ' ' . $data['middle_initial'];
             }
-    
-            // Insert the Vendor details in vendors table
+
+            // Insert the vendor details in vendors table
             $vendor = new Vendor;
             $vendor->name = $fullName;
             $vendor->mobile = $data['mobile'];
             $vendor->email = $data['email']; // Assign the email value from the form data
             $vendor->commission = 0;
             $vendor->status = 0;
-            
-    
+
             // Set Default Timezone to Manila
             date_default_timezone_set("Asia/Manila");
             $vendor->created_at = date("Y-m-d H:i:s");
             $vendor->updated_at = date("Y-m-d H:i:s");
             $vendor->save();
-    
+
             $vendor_id = $vendor->id;
-    
+
             // Insert the Vendor details in admins table
             $admin = new Admin;
             $admin->type = 'vendor';
@@ -111,18 +109,15 @@ class VendorController extends Controller
             $admin->email = $data['email'];
             $admin->password = bcrypt($data['password']);
             $admin->status = 0;
-    
+
             // Set Default Timezone to Manila
             date_default_timezone_set("Asia/Manila");
             $admin->created_at = date("Y-m-d H:i:s");
             $admin->updated_at = date("Y-m-d H:i:s");
             $admin->save();
 
-
            // After saving vendor details
             $vendor_id = $vendor->id;
-
-           
             if ($request->hasFile('shop_gov_id')) {
                 $image_tmp = $request->file('shop_gov_id');
                 if ($image_tmp->isValid()) {
@@ -135,8 +130,6 @@ class VendorController extends Controller
                 $imageGov = !empty($data['current_shop_gov_id']) ? $data['current_shop_gov_id'] : "";
             }
             // Repeat the same process for other image types
-
-
             if ($request->hasFile('shop_permit_id')) {
                 $image_tmp = $request->file('shop_permit_id');
                 if ($image_tmp->isValid()) {
@@ -148,7 +141,6 @@ class VendorController extends Controller
             } else {
                 $imagePermit = !empty($data['current_shop_permit_id']) ? $data['current_shop_permit_id'] : "";
             }
-
             if ($request->hasFile('shop_bir_id')) {
                 $image_tmp = $request->file('shop_bir_id');
                 if ($image_tmp->isValid()) {
@@ -160,7 +152,6 @@ class VendorController extends Controller
             } else {
                 $imageBir = !empty($data['current_shop_bir_id']) ? $data['current_shop_bir_id'] : "";
             }
-
             if ($request->hasFile('shop_dti_id')) {
                 $image_tmp = $request->file('shop_dti_id');
                 if ($image_tmp->isValid()) {
@@ -172,9 +163,7 @@ class VendorController extends Controller
             } else {
                 $imageDti = !empty($data['current_shop_dti_id']) ? $data['current_shop_dti_id'] : "";
             }
-          
-              
-            // insert new vendordetails
+            // Insert new vendor details
             $detail = new VendorsBusinessDetail;
             $detail -> vendor_id = $vendor_id;
             $detail->shop_name = $data['shopname'];
@@ -194,53 +183,41 @@ class VendorController extends Controller
             $detail->business_license_number = $data['vendorshoplicense'];
             $detail->gst_number = '0';
             $detail->pan_number = '0';
-            // set default time zone to Manila
+            // Set default time zone to Manila
             date_default_timezone_set("Asia/Manila");
             $detail->created_at = date("Y-m-d H:i:s");
             $detail->updated_at =  date("Y-m-d H:i:s");
             $detail->save();
-
-        
-
-
-    
-            // Send Confirmation Email
+            // Send confirmation email
             $email = $data['email'];
             $messageData = [
                 'email' => $data['email'],
                 'name' => $fullName,
                 'code' => base64_encode($data['email'])
             ];
-    
             Mail::send('emails.vendor_confirmation',$messageData,function($message)use($email){
                 $message->to($email)->subject('Confirm your Seller Account')->from('wmsu@wmsutbiu.shop', 'WMSU TBI - SHOP');
             });
-    
             DB::commit();
-    
-            // Redirect back Vendor with Success Message
+            // Redirect back vendor with success message
             $message = "Thanks for registering as seller. Please wait for admin email to confirm your account.";
             return redirect()->back()->with('success_message',$message);
-    
         }
     }
-    
     public function showBarangayTable()
     {
         $barangays = Barangay::all(); // Retrieve all barangay data
-
         // Pass the barangay data to the view
         return view('front.vendors.login_register')->with(compact('barangays'));
-
     }
 
     public function confirmVendor($email){
-        // Decode Vendor Email
+        // Decode vendor Email
         $email = base64_decode($email);
-        // Check Vendor Email exists
+        // Check vendor Email exists
         $vendorCount = Vendor::where('email',$email)->count();
         if($vendorCount>0){
-            // Vendor Email is already activated or not
+            // Vendor email is already activated or not
             $vendorDetails = Vendor::where('email',$email)->first();
             if($vendorDetails->confirm == "Yes"){
                 $message = "Your Seller Account is already confirmed. You can now login";
@@ -256,11 +233,9 @@ class VendorController extends Controller
                     'name' => $vendorDetails->name,
                     'mobile' => $vendorDetails->mobile
                 ];
-
                 Mail::send('emails.vendor_confirmed',$messageData,function($message)use($email){
                     $message->to($email)->subject('Your Seller Account Confirmed');
                 });
-
                 // Redirect to Vendor Login/Register page with Success message
                 $message = "Your seller email account has been confirmed. You can now log in and provide your personal and business details to activate your seller account and start adding products.";
                 return redirect('vendor/login-register')->with('success_message',$message);

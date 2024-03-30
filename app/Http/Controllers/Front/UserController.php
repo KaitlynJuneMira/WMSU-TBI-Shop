@@ -18,16 +18,17 @@ use Hash;
 
 class UserController extends Controller
 {
-    public function loginRegister(){    
+    public function loginRegister(){
         $barangays = Barangay::all(); // Retrieve all barangay data
         return view('front.users.login_register', compact('barangays'));
     }
 
+    // User registration
     public function userRegister(Request $request)
     {
         $data = $request->all();
-    
             // dd($request->all());
+            // Enter validation
             $validator = Validator::make($request->all(), [
                 'firstname' => 'required|regex:/^[a-zA-Z\s]+$/|max:100',
                 'lastname' => 'required|regex:/^[a-zA-Z\s]+$/|max:100',
@@ -48,9 +49,6 @@ class UserController extends Controller
                 'lastname.regex' => 'Last Name should be in valid format.',
                 'email.regex' => 'Email should be in valid format.'
             ]);
-
-            
-    
             if ($validator->passes()) {
                // Concatenate first name, middle initial (if provided), last name, and suffix (if provided)
             $fullName = $data['firstname'];
@@ -58,14 +56,10 @@ class UserController extends Controller
             if(isset($data['middleinitial']) && !empty($data['middleinitial'])) {
                 $fullName .= ' ' . $data['middleinitial'];
             }
-
             $fullName .= ' ' . $data['lastname'];
-
             if(isset($data['suffix']) && !empty($data['suffix'])) {
                 $fullName .= ' ' . $data['suffix'];
             }
-
-    
                 // Register the User
                 $user = new User;
                 $user->name = $fullName;
@@ -79,10 +73,8 @@ class UserController extends Controller
                 $user->password = bcrypt($request->input('password'));
                 $user->status = 0;
                 $user->save();
-
-                // get user Id
+                // Get user Id
                 $users_id = $user->id;
-
                 //Register Delivery Address
                 $deliver = new DeliveryAddress;
                 $deliver->user_id = $users_id;
@@ -99,17 +91,12 @@ class UserController extends Controller
                 $deliver->created_at = date("Y-m-d H:i:s");
                 $deliver->updated_at = date("Y-m-d H:i:s");
                 $deliver->save();
-
-
-    
                 // Send confirmation email
                 $email = $request->input('email');
                 $messageData = ['name' => $fullName, 'email' => $request->input('email'), 'code' => base64_encode($request->input('email'))];
                 Mail::send('emails.confirmation', $messageData, function ($message) use ($email) {
                     $message->to($email)->subject('Confirm your WMSU TBI account');
                 });
-                
-    
                 // Redirect back user with success message
                 $redirectTo = url('user/login-register');
                 return response()->json(['type' => 'success', 'url' => $redirectTo, 'message' => 'Please confirm your email to activate your account!']);
@@ -121,17 +108,16 @@ class UserController extends Controller
     public function showBarangayTable()
     {
         $barangays = Barangay::all(); // Retrieve all barangay data
-
         // Pass the barangay data to the view
         return view('front.users.login_register')->with(compact('barangays'));
 
     }
-    
 
     public function userAccount(Request $request){
         if($request->ajax()){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
+            // Enter validation
             $validator = Validator::make($request->all(), [
                     'name' => 'required|string|max:100',
                     'city' => 'required|string|max:100',
@@ -140,22 +126,16 @@ class UserController extends Controller
                     'country' => 'required|string|max:100',
                     'mobile' => 'required|numeric|digits:11',
                     'pincode' => 'required|digits:4',
-
                 ]
             );
-
             if($validator->passes()){
-
-                // Update User Details
+                // Update user details
                 User::where('id',Auth::user()->id)->update(['name'=>$data['name'],'mobile'=>$data['mobile'],'city'=>$data['city'],'barangay'=>$data['barangay'],'country'=>$data['country'],'pincode'=>$data['pincode'],'address'=>$data['address']]);
-
                 // Redirect back user with success message
                 return response()->json(['type'=>'success','message'=>'Your contact/billing details successfully updated!']);
-
             }else{
                 return response()->json(['type'=>'error','errors'=>$validator->messages()]);
             }
-
         }else{
             $zcbarangay = Barangay::all()->toArray();
             $countries = Country::where('status',1)->get()->toArray();
@@ -163,6 +143,7 @@ class UserController extends Controller
         }
     }
 
+    // Update user password
     public function userUpdatePassword(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -171,48 +152,38 @@ class UserController extends Controller
                     'current_password' => 'required',
                     'new_password' => 'required|min:6',
                     'confirm_password' => 'required|min:6|same:new_password'
-
                 ]
             );
-
             if($validator->passes()){
-
                 $current_password = $data['current_password'];
                 $checkPassword = User::where('id',Auth::user()->id)->first();
                 if(Hash::check($current_password,$checkPassword->password)){
-
-                    // Update User Current Password
+                    // Update user current password
                     $user = User::find(Auth::user()->id);
                     $user->password = bcrypt($data['new_password']);
                     $user->save();
-
                     // Redirect back user with success message
                 return response()->json(['type'=>'success','message'=>'Account password successfully updated!']);
-
                 }else{
                     // Redirect back user with error message
                     return response()->json(['type'=>'incorrect','message'=>'Your current password is incorrect!']);    
                 }
-
-
                 // Redirect back user with success message
                 return response()->json(['type'=>'success','message'=>'Your contact/billing details successfully updated!']);
-
             }else{
                 return response()->json(['type'=>'error','errors'=>$validator->messages()]);
             }
-
         }else{
             $countries = Country::where('status',1)->get()->toArray();
             return view('front.users.user_account')->with(compact('countries'));
         }
     }
 
+    // Forgot password
     public function forgotPassword(Request $request){
         if($request->ajax()){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
             $validator = Validator::make($request->all(), [
                     'email' => 'required|email|max:150|exists:users'
                 ],
@@ -220,15 +191,14 @@ class UserController extends Controller
                     'email.exists'=>'Email does not exists!'
                 ]
             );
-
             if($validator->passes()){
-                // Generate New Password
+                // Generate new password
                 $new_password = Str::random(16);
 
-                // Update New Password
+                // Update new password
                 User::where('email',$data['email'])->update(['password'=>bcrypt($new_password)]);
 
-                // Get User Details
+                // Get user details
                 $userDetails = User::where('email',$data['email'])->first()->toArray();
 
                 // Send Email to User
@@ -238,7 +208,7 @@ class UserController extends Controller
                     $message->to($email)->subject('New Password - WMSU TBI');
                 });
 
-                // Show Success Message
+                // Show success message
                 return response()->json(['type'=>'success','message'=>'New Password sent to your registered email.']);
 
             }else{
@@ -250,16 +220,16 @@ class UserController extends Controller
         }
     }
 
+    // Login user
     public function userLogin(Request $request){
         if($request->Ajax()){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email|max:150|exists:users',
                 'password' => 'required|min:6'
             ]);
-
             if($validator->passes()){
 
                 if(Auth::attempt(['email'=>$data['email'],'password'=>$data['password']])){
@@ -268,21 +238,17 @@ class UserController extends Controller
                         Auth::logout();
                         return response()->json(['type'=>'inactive','message'=>'Your account is not activated! Please confirm your account to activate your account.']);
                     }
-
-                    // Update User Cart with user id
+                    // Update user cart with user ID
                     if(!empty(Session::get('session_id'))){
                         $user_id = Auth::user()->id;
                         $session_id = Session::get('session_id');
                         Cart::where('session_id',$session_id)->update(['user_id'=>$user_id]);
                     }
-
-
                     $redirectTo = url('cart');
                     return response()->json(['type'=>'success','url'=>$redirectTo]);
                 }else{
                     return response()->json(['type'=>'incorrect','message'=>'Incorrect Email or Password!']);
                 }
-
             }else{
                 return response()->json(['type'=>'error','errors'=>$validator->messages()]);
             }
@@ -290,30 +256,32 @@ class UserController extends Controller
         }
     }
 
+    // Logout user
     public function userLogout(){
         Auth::logout();
         Session::flush();
         return redirect('/');
     }
 
+    // Account confirmation
     public function confirmAccount($code){
         $email = base64_decode($code);
         $userCount = User::where('email',$email)->count();
         if($userCount>0){
             $userDetails = User::where('email',$email)->first();
             if($userDetails->status==1){
-                // Redirect the user to Login/Register Page with error message
+                // Redirect the user to Login/Register page with error message
                 return redirect('user/login-register')->with('error_message','Your account is already activated. You can login now.');
             }else{
                 User::where('email',$email)->update(['status'=>1]);
 
-                // Send Welcome Email
+                // Send welcome email
                 $messageData = ['name'=>$userDetails->name,'mobile'=>$userDetails->mobile,'email'=>$email];
                 Mail::send('emails.register',$messageData,function($message)use($email){
                     $message->to($email)->subject('Welcome to WMSU TBI Shop');
                 });
 
-                // Redirect the user to Login/Register Page with success message
+                // Redirect the user to Login/Register page with success message
                 return redirect('user/login-register')->with('success_message','Your account is activated. You can login now.');
             }
         }else{
