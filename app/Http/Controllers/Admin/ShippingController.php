@@ -9,6 +9,7 @@ use Session;
 
 class ShippingController extends Controller
 {
+    // Display shipping charrges
     public function shippingCharges(){
         Session::put('page','shipping');
         $shippingCharges = ShippingCharge::get()->toArray();
@@ -16,6 +17,7 @@ class ShippingController extends Controller
         return view('admin.shipping.shipping_charges')->with(compact('shippingCharges'));
     }
 
+    // Uodate shipping status
     public function updateShippingStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -30,6 +32,7 @@ class ShippingController extends Controller
         }
     }
 
+    // Edit shipping charges
     public function editShippingCharges($id, Request $request){
         Session::put('page','shipping');
         if($request->isMethod('post')){

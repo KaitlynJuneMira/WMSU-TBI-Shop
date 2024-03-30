@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use App\Models\User;
 use App\Models\Barangay;
 use Session;
 
 class UserController extends Controller
 {
+    // Display users
     public function users(){
         Session::put('page','users');
         $users = User::get()->toArray();
-        
         // dd($users);
         return view('admin.users.users')->with(compact('users'));
     }
 
+    // Update user status
     public function updateUserStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();

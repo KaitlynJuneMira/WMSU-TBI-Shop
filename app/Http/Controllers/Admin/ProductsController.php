@@ -18,10 +18,12 @@ use Illuminate\Support\Facades\DB;
 
 class ProductsController extends Controller
 {
+    // Display products / check if the vendor account is approved or not
     public function products(){
         Session::put('page','products');
         $adminType = Auth::guard('admin')->user()->type;
         $vendor_id = Auth::guard('admin')->user()->vendor_id;
+        // Not approved vendor account
         if($adminType=="vendor"){
             $vendorStatus = Auth::guard('admin')->user()->status;
             if($vendorStatus==0){
@@ -33,6 +35,7 @@ class ProductsController extends Controller
         },'category'=>function($query){
             $query->select('id','category_name');
         }]);
+        // Approved vendor account
         if($adminType=="vendor"){
             $products = $products->where('vendor_id',$vendor_id);
         }
@@ -41,6 +44,7 @@ class ProductsController extends Controller
         return view('admin.products.products')->with(compact('products'));
     }
 
+    // Update product status
     public function updateProductStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -62,6 +66,7 @@ class ProductsController extends Controller
         return redirect()->back()->with('success_message',$message);
     }
 
+    // Add and edit product
     public function addEditProduct(Request $request, $id=null){
         Session::put('page','products');
         if($id==""){
@@ -78,7 +83,7 @@ class ProductsController extends Controller
         if($request->isMethod('post')){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 'category_id' => 'required',
                 /*'product_name' => 'required|regex:/^[\pL\s\-]+$/u',*/
@@ -87,7 +92,7 @@ class ProductsController extends Controller
                 'product_price' => 'required|numeric',
                 'product_color' => 'required|regex:/^[\pL\s\-]+$/u',
             ];
-
+            // Custom error messages
             $customMessages = [
                 'category_id.required' => 'Category is required',
                 'product_name.required' => 'Product Name is required',
@@ -175,7 +180,7 @@ class ProductsController extends Controller
             if(empty($data['product_weight'])){
                 $data['product_weight'] = 0;
             }
-
+            // Set product informations
             $product->product_name = $data['product_name'];
             $product->product_code = $data['product_code'];
             $product->product_color = $data['product_color'];
@@ -287,7 +292,7 @@ class ProductsController extends Controller
                     if($sizeCount>0){
                         return redirect()->back()->with('error_message','Size already exists! Please add another Size!');    
                     }
-
+                    // Set attribute informations
                     $attribute = new ProductsAttribute;
                     $attribute->product_id = $id;
                     $attribute->sku = $value;
@@ -305,6 +310,7 @@ class ProductsController extends Controller
         return view('admin.attributes.add_edit_attributes')->with(compact('product'));
     }
 
+    // Update attribute status
     public function updateAttributeStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -319,6 +325,7 @@ class ProductsController extends Controller
         }
     }
 
+    // Edit attributes
     public function editAttributes(Request $request){
         if($request->isMethod('post')){
             $data = $request->all();
@@ -332,6 +339,7 @@ class ProductsController extends Controller
         }
     }
 
+    // Add images
     public function addImages($id, Request $request){
         Session::put('page','products');
         $product = Product::select('id','product_name','product_code','product_color','product_price','product_image')->with('images')->find($id); 
@@ -371,6 +379,7 @@ class ProductsController extends Controller
         return view('admin.images.add_images')->with(compact('product'));
     }
 
+    // Update image status
     public function updateImageStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();

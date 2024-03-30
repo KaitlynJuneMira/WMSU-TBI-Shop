@@ -8,12 +8,14 @@ use App\Models\Rating;
 
 class RatingController extends Controller
 {
+    // Display ratings
     public function ratings(){
         $ratings = Rating::with(['user','product'])->get()->toArray();
         /*dd($ratings);*/
         return view('admin.ratings.ratings')->with(compact('ratings'));
     }
 
+    // Update rating status
     public function updateRatingStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();

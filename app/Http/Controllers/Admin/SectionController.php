@@ -9,6 +9,7 @@ use Session;
 
 class SectionController extends Controller
 {
+    // Display sections
     public function sections(){
         Session::put('page','sections');
         $sections = Section::get()->toArray();
@@ -16,6 +17,7 @@ class SectionController extends Controller
         return view('admin.sections.sections')->with(compact('sections'));
     }
 
+    // Update section status
     public function updateSectionStatus(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -30,6 +32,7 @@ class SectionController extends Controller
         }
     }
 
+    // Delete section
     public function deleteSection($id){
         // Delete Section
         Section::where('id',$id)->delete();
@@ -37,6 +40,7 @@ class SectionController extends Controller
         return redirect()->back()->with('success_message',$message);
     }
 
+    // Add and edit section
     public function addEditSection(Request $request,$id=null){
         Session::put('page','sections');
         if($id==""){
@@ -52,11 +56,11 @@ class SectionController extends Controller
         if($request->isMethod('post')){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 'section_name' => 'required|regex:/^[\pL\s\-]+$/u',
             ];
-
+            // Custom error messages
             $customMessages = [
                 'section_name.required' => 'Section Name is required',
                 'section_name.regex' => 'Valid Section Name is required',

@@ -20,9 +20,9 @@ use App\Models\Order;
 use App\Models\Coupon;
 use App\Models\Brand;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;//K
-use Illuminate\Validation\Rule;//K
-use Carbon\Carbon;//K
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 use Image;
 use Session;
 
