@@ -16,7 +16,6 @@ use App\Models\ProductsAttribute;
 
 class GcashController extends Controller
 {
-
     public function pay(Request $request)
         {
             if(!Session::has('order_id')){

@@ -10,6 +10,7 @@ use Validator;
 
 class CmsController extends Controller
 {
+    // Fetch CMS page
     public function cmsPage(){
         $currentRoute = url()->current();
         $currentRoute = str_replace("http://127.0.0.1:8000/","",$currentRoute);
@@ -25,18 +26,19 @@ class CmsController extends Controller
         }
     }
 
+    // Set contact form
     public function contact(Request $request){
         if($request->isMethod('post')){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 "name" => "required|string|max:100",
                 "email" => "required|email|max:150",
                 "subject" => "required|max:200",
                 "message" => "required",
             ];
-
+            // Custom error messages
             $customMessages = [
                 'name.required' => 'Name is required',
                 'email.required' => 'Email is required',
@@ -50,8 +52,8 @@ class CmsController extends Controller
                 return redirect()->back()->withErrors($validator)->withInput();
             }
 
-            // Send User query to Admin
-            $email = "admin1000@yopmail.com";
+            // Send user query to admin
+            $email = "wmsu@wmsutbiu.shop";
             $messageData = [
                 'name' => $data['name'],
                 'email' => $data['email'],

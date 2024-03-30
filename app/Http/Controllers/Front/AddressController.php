@@ -14,6 +14,7 @@ use Validator;
 
 class AddressController extends Controller
 {
+    // Fetch delivery address
     public function getDeliveryAddress(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -22,8 +23,10 @@ class AddressController extends Controller
         }
     }
 
+    // Save delivery address
     public function saveDeliveryAddress(Request $request){
         if($request->ajax()){
+            // Enter validation
             $validator = Validator::make($request->all(),[
                 'delivery_name' => ['required', 'string', 'max:100', 'regex:/^\b\w+\s\w+(\s\w+)?\b$/'],
                 'delivery_mobile' => ['required', 'numeric', 'digits:11', 'regex:/^09\d{9}$/'],                
@@ -33,6 +36,7 @@ class AddressController extends Controller
                 'delivery_country'=>'required|string|max:100',
                 'delivery_pincode'=>'required|digits:4',
             ]);
+            // Get address infomations
             if($validator->passes()){
                 $data = $request->all();
                 //echo "<pre>"; print_r($data); die;
@@ -46,11 +50,11 @@ class AddressController extends Controller
                 $address['pincode']=$data['delivery_pincode'];
                 $address['mobile']=$data['delivery_mobile'];
                 if(!empty($data['delivery_id'])){
-                    // Edit Delivery Address
+                    // Edit delivery address
                     DeliveryAddress::where('id',$data['delivery_id'])->update($address);
                 }else{
                     /*$address['status']=1;*/
-                    // Add Delivery Address
+                    // Add delivery address
                     DeliveryAddress::create($address);
                 }
                 $deliveryAddresses = DeliveryAddress::deliveryAddresses();
@@ -66,6 +70,7 @@ class AddressController extends Controller
         }
     }
 
+    // Remove delivery address
     public function removeDeliveryAddress(Request $request){
         if($request->ajax()){
             $data = $request->all();

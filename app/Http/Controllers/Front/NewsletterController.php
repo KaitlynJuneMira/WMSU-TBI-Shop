@@ -8,6 +8,7 @@ use App\Models\NewsletterSubscriber;
 
 class NewsletterController extends Controller
 {
+    // Handle new subscriber
     public function addSubscriber(Request $request){
         if($request->ajax()){
             $data = $request->all();
@@ -15,7 +16,7 @@ class NewsletterController extends Controller
             if($subscriberCount>0){
                 return "exists";
             }else{
-                // Add Newsletter email in newsletter_subscribers table
+                // Add newsletter email in newsletter_subscribers table
                 $subscriber = new NewsletterSubscriber;
                 $subscriber->email = $data['subscriber_email'];
                 $subscriber->status = 1;
