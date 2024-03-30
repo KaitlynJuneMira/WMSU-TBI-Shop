@@ -417,9 +417,6 @@
             e.preventDefault(); 
             window.location.href = 'dashboard-drillAnalyticsRevenueDownload/'+export_type+'/'+year+'/'+vendor+'/'+paid+'/'+chartX
         });
-        
-        
-        
     </script>
 </div>
 @endsection

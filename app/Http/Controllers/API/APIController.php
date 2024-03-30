@@ -21,16 +21,18 @@ use DB;
 
 class APIController extends Controller
 {
+    // User registration
     public function registerUser(Request $request){
         if($request->isMethod('post')){
             $data = $request->input();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 "name" => "required",
                 "email" => "required|email|unique:users",
                 "password" => "required"
             ];
+            // Custom error messages
             $customMessages = [
                 "name.required" => "Name is required",
                 "email.required" => "Email is required",
@@ -42,7 +44,7 @@ class APIController extends Controller
             if($validator->fails()){
                 return response()->json($validator->errors(),422);
             }
-
+            // Get user informations
             $user = new User;
             $user->name = $data['name'];
             $user->mobile = $data['mobile'];
@@ -54,15 +56,17 @@ class APIController extends Controller
         }
     }
 
+    // User login
     public function loginUser(Request $request){
         if($request->isMethod('post')){
             $data = $request->input();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 "email" => "required|email|exists:users",
                 "password" => "required"
             ];
+            // Custom error messages
             $customMessages = [
                 "email.required" => "Email is required",
                 "email.exists" => "Email does not exists",
@@ -90,22 +94,24 @@ class APIController extends Controller
                 }else{
                     $message = "Password is Incorrect!";
                     return response()->json(['status'=>false,"message"=>$message],422);
-                }   
+                }
             }else{
                 $message = "Email is Incorrect!";
                 return response()->json(['status'=>false,"message"=>$message],422);
-            }            
+            }
         }
     }
 
+    // Update user
     public function updateUser(Request $request){
         if($request->isMethod('post')){
             $data = $request->input();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 "name" => "required"
             ];
+            // Custom error messages
             $customMessages = [
                 "name.required" => "Name is required"
             ];
@@ -146,7 +152,6 @@ class APIController extends Controller
                     "status"=>true,
                     "message"=>"User Updated Successfully!"
                 ],201);
-                
             }else{
                 $message = "User does not exists!";
                 return response()->json(['status'=>false,"message"=>$message],422);
@@ -156,6 +161,7 @@ class APIController extends Controller
         }
     }
 
+    // Fetch CMS page
     public function cmsPage(){
         $currentRoute = url()->current();
         $currentRoute = str_replace("http://127.0.0.1:8000/api/","",$currentRoute);
@@ -171,9 +177,9 @@ class APIController extends Controller
             $message = "Page does not exists!";
             return response()->json(['status'=>false,"message"=>$message],422);
         }
-        
     }
 
+    // Fetch categories
     public function menu(){
         $categories = Section::with('categories')->get();
         return response()->json(["categories"=>$categories],200);
@@ -182,11 +188,11 @@ class APIController extends Controller
     public function listing($url){
         $categoryCount = Category::where(['url'=>$url,'status'=>1])->count();
         if($categoryCount>0){
-            // Get Category Details
-            $categoryDetails = Category::categoryDetails($url);            
+            // Get category details
+            $categoryDetails = Category::categoryDetails($url);
             $categoryProducts = Product::with('brand')->whereIn('category_id',$categoryDetails['catIds'])->where('status',1);
 
-            // Checking for Dynamic Filters
+            // Checking for dynamic filters
             $productFilters = ProductsFilter::productFilters();
             foreach ($productFilters as $key => $filter) {
                     // If filter is selected
@@ -195,7 +201,7 @@ class APIController extends Controller
                 }
             }
 
-            // checking for Sort
+            // Checking for sort
             if(isset($_GET['sort']) && !empty($_GET['sort'])){
                 if($_GET['sort']=="product_latest"){
                     $categoryProducts->orderby('products.id','Desc');
@@ -210,29 +216,19 @@ class APIController extends Controller
                 }
             }
 
-            // checking for Size
+            // Checking for size
             if(isset($data['size']) && !empty($data['size'])){
                 $productIds = ProductsAttribute::select('product_id')->whereIn('size',$data['size'])->pluck('product_id')->toArray();
                 $categoryProducts->whereIn('products.id',$productIds);
             }
 
-                // checking for Color
+                // Checking for color
             if(isset($data['color']) && !empty($data['color'])){
                 $productIds = Product::select('id')->whereIn('product_color',$data['color'])->pluck('id')->toArray();
                 $categoryProducts->whereIn('products.id',$productIds);
             }
 
-            // checking for Price
-            /*if(isset($data['price']) && !empty($data['price'])){
-                foreach ($data['price'] as $key => $price) {
-                    $priceArr = explode("-",$price);
-                    $productIds[] = Product::select('id')->whereBetween('product_price',[$priceArr[0],$priceArr[1]])->pluck('id')->toArray();
-                }
-                $productIds = call_user_func_array('array_merge', $productIds);
-                $categoryProducts->whereIn('products.id',$productIds);
-            }*/
-
-            // checking for Price
+            // Checking for price
             $productIds = array();
             if(isset($data['price']) && !empty($data['price'])){
                 foreach ($data['price'] as $key => $price) {
@@ -245,7 +241,7 @@ class APIController extends Controller
                 $categoryProducts->whereIn('products.id',$productIds);
             }
 
-            // checking for Brand
+            // Checking for brand
             if(isset($data['brand']) && !empty($data['brand'])){
                 $productIds = Product::select('id')->whereIn('brand_id',$data['brand'])->pluck('id')->toArray();
                 $categoryProducts->whereIn('products.id',$productIds);
@@ -253,6 +249,7 @@ class APIController extends Controller
 
             $categoryProducts = $categoryProducts->get();
 
+            // Compute the final price
             foreach ($categoryProducts as $key => $value) {
                 $getDiscountPrice = Product::getDiscountPrice($categoryProducts[$key]['id']);
                 if($getDiscountPrice>0){
@@ -272,11 +269,13 @@ class APIController extends Controller
 
     public function detail($id){
         $productCount = Product::where(['id'=>$id,'status'=>1])->count();
+        // Fetch product details
         if($productCount>0){
             $productDetails = Product::with(['section','category','brand','attributes'=>function($query){
             $query->where('stock','>',0)->where('status',1);
             },'images','vendor'])->where('id',$id)->get();
 
+            // Compute final price
             foreach ($productDetails as $key => $value) {
                 $getDiscountPrice = Product::getDiscountPrice($productDetails[$key]['id']);
                 if($getDiscountPrice>0){
@@ -326,10 +325,11 @@ class APIController extends Controller
     }
 
     public function cart($userid){
+        // Fetch cart items
         $getCartItems = Cart::with(['product'=>function($query){
                 $query->select('id','category_id','product_name','product_code','product_color','product_image','product_weight','product_price');
             }])->orderby('id','Desc')->where('user_id',$userid)->get();
-
+        // Compute final price
         foreach ($getCartItems as $key => $item) {
             $getDiscountPrice = Product::getDiscountAttributePrice($item['product_id'],$item['size']);
             if($getDiscountPrice>0){
@@ -346,10 +346,11 @@ class APIController extends Controller
     }
 
     public function checkout($userid){
+        // Fetch cart items in checkout
         $getCartItems = Cart::with(['product'=>function($query){
                 $query->select('id','category_id','product_name','product_code','product_color','product_image','product_weight','product_price');
             }])->orderby('id','Desc')->where('user_id',$userid)->get();
-
+        // Compute final price
         $total_price = 0;
         foreach ($getCartItems as $key => $item) {
             $getDiscountPrice = Product::getDiscountAttributePrice($item['product_id'],$item['size']);
@@ -362,7 +363,7 @@ class APIController extends Controller
             }
             $getCartItems[$key]['product']['product_image'] = url("/front/images/product_images/small/".$item['product']['product_image']);
         }
-
+        // Compute total price
         foreach ($getCartItems as $key => $item) {
             $getCartItems[$key]['product']['total_price'] = $total_price;    
             $getCartItems[$key]['product']['key'] = $key;    
@@ -373,6 +374,7 @@ class APIController extends Controller
         return response()->json(["products"=>$getCartItems],200);
     }
 
+    // Deleting cart item
     public function deleteCartItem($cartid){
         Cart::where('id',$cartid)->delete();
         return response()->json([
@@ -385,12 +387,13 @@ class APIController extends Controller
         if($request->isMethod('post')){
             $data = $request->all();
             /*echo "<pre>"; print_r($data); die;*/
-
+            // Enter validation
             $rules = [
                 "name" => "required",
                 "address" => "required",
                 "city" => "required"
             ];
+            // Set custom error messages
             $customMessages = [
                 "name.required" => "Name is required",
                 "address.required" => "Address is required",
@@ -401,13 +404,15 @@ class APIController extends Controller
             if($validator->fails()){
                 return response()->json($validator->errors(),422);
             }
-
+            // Get cart items
             $getCartItems = Cart::with(['product'=>function($query){
                 $query->select('id','category_id','product_name','product_code','product_color','product_image','product_weight','product_price');
             }])->orderby('id','Desc')->where('user_id',$userid)->get();
 
+            // Calculate total price and weight
             $total_price = 0;
             $total_weight = 0;
+            // Get final price
             foreach ($getCartItems as $key => $item) {
                 $getDiscountPrice = Product::getDiscountAttributePrice($item['product_id'],$item['size']);
                 if($getDiscountPrice>0){
@@ -423,30 +428,30 @@ class APIController extends Controller
                 $total_weight = $total_weight+$getProductWeight->product_weight;
             }
 
-            // For COD Order Placement
+            // For COD order placement
             $payment_method = "COD";
             $order_status = "New";
 
 
             DB::beginTransaction();
 
-            // Fetch Order Total Price
+            // Fetch order total price
             $total_price = 0;
             foreach($getCartItems as $item){
                 $getDiscountAttributePrice = Product::getDiscountAttributePrice($item['product_id'],$item['size']);
                 $total_price = $total_price + ($getDiscountAttributePrice['final_price'] * $item['quantity']);
             }
 
-            // Calculate Shipping Charges
+            // Calculate shipping charges
             $shipping_charges = 0;
 
-            // Get Shipping Charges
+            // Get shipping charges
             $shipping_charges = ShippingCharge::getShippingCharges($total_weight,$data['country']);
 
-            // Calculate Grand Total
+            // Calculate grand total
             $grand_total = $total_price + $shipping_charges;
 
-            // Insert Order Details
+            // Insert order details
             $order = new Order;
             $order->user_id = $userid;
             $order->name = $data['name'];
@@ -457,9 +462,10 @@ class APIController extends Controller
             $order->pincode = $data['pincode'];
             $order->mobile = $data['mobile'];
 
-            // Get User Email
+            // Get user email
             $getUserEmail = User::select('email')->where('id',$userid)->first();
 
+            // Get order informations
             $order->email = $getUserEmail->email;
             $order->shipping_charges = $shipping_charges;
             $order->order_status = $order_status;
@@ -469,6 +475,7 @@ class APIController extends Controller
             $order->save();
             $order_id = DB::getPdo()->lastInsertId();
 
+            // Get cart infomations
             foreach($getCartItems as $item){
                 $cartItem = new OrdersProduct;
                 $cartItem->order_id = $order_id;
@@ -505,6 +512,7 @@ class APIController extends Controller
         }
     }
 
+    // Fetch orders and its date ordered
     public function userOrders($userid){
         $orders = Order::where('user_id',$userid)->orderBy('id','Desc')->get();
         foreach ($orders as $key => $order) {
