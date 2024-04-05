@@ -1,5 +1,6 @@
 @extends('admin.layout.layout')
 @section('content')
+<!-- Display all products profiled -->
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -15,12 +16,10 @@
                                 <button class="btn btn-success mx-3" data-toggle="modal" data-target="#downloadProductModal">Download</button>
                                 <a style="" href="{{ url('admin/add-edit-product') }}" class="btn btn-primary">Add Product</a>
                             </div>
-                           
-                            
-                            
                             <div class="modal fade" id="downloadProductModal" tabindex="-1" role="dialog" aria-labelledby="downloadProductModalLabel" aria-hidden="true" wire:ignore.self>
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
+                                        <!-- Create a downloadable files for all of the products profiled -->
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="downloadProductModalLabel">Download</h5>
                                         </div>
@@ -42,10 +41,8 @@
                                                 ['table_name'=>'Discount','column_name'=>'product_discount'],
                                                 ['table_name'=>'Weight','column_name'=>'product_weight'],
                                                 ['table_name'=>'Group-Code','column_name'=>'group_code'],
-                                                // ['table_name'=>'is-Bestseller','column_name'=>'is_bestseller'],
                                                 ['table_name'=>'Section-Name','column_name'=>'s.name'],
                                                 ['table_name'=>'Category-Name','column_name'=>'category_name'],
-                                                // ['table_name'=>'Category-Discount','column_name'=>'category_discount'],
                                                 ['table_name'=>'Vendor-Name','column_name'=>'v.name'],
                                                 ['table_name'=>'Vendor-Email','column_name'=>'v.email'],
                                                 ['table_name'=>'Vendor-No','column_name'=>'v.mobile'],
@@ -163,6 +160,7 @@
                                                     {{ ucfirst($product['admin_type']) }}    
                                                 @endif
                                             </td>  
+                                            <!-- Mark the product as active or not -->
                                             <td>
                                                 @if($product['status']==1)
                                                   <a class="updateProductStatus" id="product-{{ $product['id'] }}" product_id="{{ $product['id'] }}" href="javascript:void(0)"><i style="font-size:25px;" class="mdi mdi-bookmark-check" status="Active"></i></a>
@@ -186,14 +184,5 @@
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <!-- partial:../../partials/_footer.html -->
-    <!-- <footer class="footer">
-        <div class="d-sm-flex justify-content-center justify-content-sm-between">
-            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
-            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
-        </div>
-    </footer> -->
-    <!-- partial -->
 </div>
 @endsection

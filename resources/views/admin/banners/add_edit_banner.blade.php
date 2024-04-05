@@ -1,5 +1,6 @@
 @extends('admin.layout.layout')
 @section('content')
+<!-- Add and edit banners -->
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -11,15 +12,6 @@
                     <div class="col-12 col-xl-4">
                         <div class="justify-content-end d-flex">
                             <div class="dropdown flex-md-grow-1 flex-xl-grow-0">
-                                <button class="btn btn-sm btn-light bg-white dropdown-toggle" type="button" id="dropdownMenuDate2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                <i class="mdi mdi-calendar"></i> Today (10 Jan 2021)
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuDate2">
-                                    <a class="dropdown-item" href="#">January - March</a>
-                                    <a class="dropdown-item" href="#">March - June</a>
-                                    <a class="dropdown-item" href="#">June - August</a>
-                                    <a class="dropdown-item" href="#">August - November</a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -59,9 +51,9 @@
                     </button>
                   </div>
                   @endif
-                  
+
                   <form class="forms-sample" @if(empty($banner['id'])) action="{{ url('admin/add-edit-banner') }}" @else action="{{ url('admin/add-edit-banner/'.$banner['id']) }}" @endif method="post" enctype="multipart/form-data">@csrf
-                    
+                    <!-- Banner profiling -->
                     <div class="form-group">
                       <label for="link">Banner Type</label>
                       <select class="form-control" id="type" name="type" required="">
@@ -95,12 +87,7 @@
                 </div>
               </div>
             </div>
-            
           </div>
     </div>
-    <!-- content-wrapper ends -->
-    <!-- partial:partials/_footer.html -->
-    @include('admin.layout.footer')
-    <!-- partial -->
 </div>
 @endsection

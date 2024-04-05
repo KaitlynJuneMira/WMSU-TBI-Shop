@@ -1,3 +1,4 @@
+<!-- Select categort=y levels -->
 <div class="form-group">
   <label for="parent_id">Select Category Level</label>
   <select name="parent_id" id="parent_id" class="form-control"  style="color: #000;">

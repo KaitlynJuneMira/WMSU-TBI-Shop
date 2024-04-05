@@ -1,5 +1,6 @@
 @extends('admin.layout.layout')
 @section('content')
+<!-- Display all of the orders -->
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -7,16 +8,15 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Orders</h4>
-                      
                         <div class='row d-flex justify-content-between'>
                             <a href="javascript:history.back()" class="back-link mx-3">
                                 <i class="fas fa-arrow-left"></i> Back
                             </a>
                             <button class="btn btn-success mx-3" data-toggle="modal" data-target="#downloadProductModal">Download</button>
-                           
                             <div class="modal fade" id="downloadProductModal" tabindex="-1" role="dialog" aria-labelledby="downloadProductModalLabel" aria-hidden="true" wire:ignore.self>
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
+                                        <!-- Create downloadable files for all of the orders -->
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="downloadProductModalLabel">Download</h5>
                                         </div>
@@ -104,10 +104,6 @@
                                  });
                             </script>
                         </div>
-
-                        <!-- <p class="card-description">
-                            Add class <code>.table-bordered</code>
-                        </p> -->
                         <div class="table-responsive pt-3">
                             <table id="orders" class="table table-bordered">
                                 <thead>
@@ -179,10 +175,9 @@
                                             &nbsp;&nbsp;
                                             <a target="_blank" title="Print PDF Invoice" href="{{ url('admin/orders/invoice/pdf/'.$order['id']) }}"><i style="font-size:25px;" class="mdi mdi-file-pdf"></i></a>
                                         </td>
-                                        
                                     </tr>
                                     @endif
-                                   @endforeach 
+                                   @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -191,14 +186,5 @@
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <!-- partial:../../partials/_footer.html -->
-    <!-- <footer class="footer">
-        <div class="d-sm-flex justify-content-center justify-content-sm-between">
-            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
-            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
-        </div>
-    </footer> -->
-    <!-- partial -->
 </div>
 @endsection

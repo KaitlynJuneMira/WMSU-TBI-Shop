@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!-- Display the login blade -->
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -26,9 +26,6 @@
         <div class="row w-100 mx-0">
           <div class="col-lg-4 mx-auto">
             <div class="auth-form-light text-left py-5 px-4 px-sm-5">
-              <!-- <div class="brand-logo">
-                <img src="{{ url('admin/images/logo.svg') }}" alt="logo">
-              </div> -->
               <h4>Hello! let's get started</h4>
               <h6 class="font-weight-light">Sign in to continue.</h6>
               @if(Session::has('error_message'))
@@ -64,22 +61,12 @@
                 <div class="mt-3 text-center">
                 <a href="{{ url('/') }}" class="btn btn-link">Go to Homepage</a>
               </div>
-                <!-- <div class="my-2 d-flex justify-content-between align-items-center">
-                  <div class="form-check">
-                    <label class="form-check-label text-muted">
-                      <input type="checkbox" class="form-check-input">
-                      Keep me signed in
-                    </label>
-                  </div>
-                </div> -->
               </form>
             </div>
           </div>
         </div>
       </div>
-      <!-- content-wrapper ends -->
     </div>
-    <!-- page-body-wrapper ends -->
   </div>
   <!-- container-scroller -->
   <!-- plugins:js -->
