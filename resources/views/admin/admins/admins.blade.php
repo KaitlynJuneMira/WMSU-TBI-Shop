@@ -159,13 +159,14 @@
                               </td>
                               <!-- Account confirmation -->
                               <!-- Activate or deactivate seller account -->
-                              <td>
+                              <td class="text-center">
                                  @if($admin['status']==1)
-                                 <a class="updateAdminStatus" id="admin-{{ $admin['id'] }}" admin_id="{{ $admin['id'] }}" href="javascript:void(0)"><i style="font-size:25px;" class="mdi mdi-bookmark-check" status="Active"></i></a>
+                                 <a class="updateAdminStatus btn btn-success" id="admin-{{ $admin['id'] }}" admin_id="{{ $admin['id'] }}" href="javascript:void(0)" data-status="Active"><i status="Active"></i>Active</a>
                                  @else
-                                 <a class="updateAdminStatus" id="admin-{{ $admin['id'] }}" admin_id="{{ $admin['id'] }}" href="javascript:void(0)"><i style="font-size:25px;" class="mdi mdi-bookmark-outline" status="Inactive"></i></a>
+                                 <a class="updateAdminStatus btn btn-danger" id="admin-{{ $admin['id'] }}" admin_id="{{ $admin['id'] }}" href="javascript:void(0)" data-status="Inactive"><i status="Inactive"></i>Inactive</a>
                                  @endif
                               </td>
+
                               <!-- Show the business information the seller has profiled upon registration for this is the basis of the admin to accept the seller's account -->
                               <td>
                                  @if($admin['type']=="vendor")

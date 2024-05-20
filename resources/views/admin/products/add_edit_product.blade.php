@@ -136,18 +136,6 @@
                           <textarea name="description" id="description" class="form-control" rows="3">{{ $product['description'] }}</textarea>
                         </div>
                         <div class="form-group">
-                          <label for="meta_title">Meta Title</label>
-                          <input type="text" class="form-control" id="meta_title" placeholder="Enter Meta Title" name="meta_title" @if(!empty($product['meta_title'])) value="{{ $product['meta_title'] }}" @else value="{{ old('meta_title') }}" @endif>
-                        </div>
-                        <div class="form-group">
-                          <label for="  meta_description">Meta Description</label>
-                          <input type="text" class="form-control" id="meta_description" placeholder="Enter Meta Description" name="meta_description" @if(!empty($product['meta_description'])) value="{{ $product['meta_description'] }}" @else value="{{ old('meta_description') }}" @endif>
-                        </div>
-                        <div class="form-group">
-                          <label for="meta_keywords">Meta Keywords</label>
-                          <input type="text" class="form-control" id="meta_keywords" placeholder="Enter Meta Keywords" name="meta_keywords" @if(!empty($product['meta_keywords'])) value="{{ $product['meta_keywords'] }}" @else value="{{ old('meta_keywords') }}" @endif>
-                        </div>
-                        <div class="form-group">
                           <label for="is_featured">Featured Item</label>
                           <input type="checkbox" name="is_featured" id="is_featured" value="Yes" @if(!empty($product['is_featured']) && $product['is_featured']=="Yes") checked="" @endif>
                         </div>

@@ -145,7 +145,7 @@
                                             {{ $order['id'] }}
                                         </td>
                                         <td>
-                                            {{ date('Y-m-d h:i:s', strtotime($order['created_at'])); }}
+                                            {{ date('Y-m-d h:i:s', strtotime($order['created_at'])) }}
                                         </td>
                                         <td>
                                             {{ $order['name'] }}

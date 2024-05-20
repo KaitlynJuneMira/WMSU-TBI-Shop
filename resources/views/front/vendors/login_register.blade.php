@@ -201,12 +201,12 @@
                                                 </label>
                                                 <input type="text" id="vendorshopcontact" name="vendorshopcontact" class="text-field" placeholder="Shop Contact Number">
                                             </div>
-                                            <div class="u-s-m-b-30">
+                                            <!-- <div class="u-s-m-b-30">
                                                 <label for="vendorshoplicense">Business License Number
                                                     <span class="astk">*</span>
                                                 </label>
                                                 <input type="text" id="vendorshoplicense" name="vendorshoplicense" class="text-field" placeholder="Business License Number">
-                                            </div>
+                                            </div> -->
                                         </div>
                                         <div class="col-md-6">
                                             <div class="u-s-m-b-30">

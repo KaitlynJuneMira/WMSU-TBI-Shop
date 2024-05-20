@@ -36,7 +36,7 @@ class VendorController extends Controller
                 'vendorshopdetails' => 'required',
                 'vendorshopbarangay' => 'required',
                 'vendorshopcontact' => 'required|min:11|numeric',
-                'vendorshoplicense' => 'required',
+                // 'vendorshoplicense' => 'required',
                 'shop_gov_id' => 'required',
                 'shop_permit_id' => 'required',
                 'shop_bir_id' => 'required',
@@ -62,7 +62,7 @@ class VendorController extends Controller
                 'vendorshopdetails.required' => 'Shop Address Details is Required',
                 'vendorshopbarangay.required' => 'Shop Barangay is Required',
                 'vendorshopcontact.required' => 'Shop Contact is Required',
-                'vendorshoplicense.required' => 'Bussiness License Number is Required',
+                // 'vendorshoplicense.required' => 'Bussiness License Number is Required',
                 'shop_gov_id.required' => 'Government ID is Required',
                 'shop_permit_id.required' => 'Shop Permit is Required',
                 'shop_bir_id.required' => 'BIR is Required',
@@ -107,7 +107,7 @@ class VendorController extends Controller
             $admin->name = $fullName;
             $admin->mobile = $data['mobile'];
             $admin->email = $data['email'];
-            $admin->password = bcrypt($data['password']);
+            $admin->password = bcrypt($request->input('password'));
             $admin->status = 0;
 
             // Set Default Timezone to Manila
@@ -180,7 +180,7 @@ class VendorController extends Controller
             $detail->permit_proof_image = $imagePermit;
             $detail->bir_image = $imageBir;
             $detail->dti_image = $imageDti;
-            $detail->business_license_number = $data['vendorshoplicense'];
+            // $detail->business_license_number = $data['vendorshoplicense'];
             $detail->gst_number = '0';
             $detail->pan_number = '0';
             // Set default time zone to Manila

@@ -40,7 +40,7 @@
                   </div>
                   <div class="form-group" style="height: 15px;">
                      <label style="font-weight: 550;">Order Date: </label>
-                     <label>{{ date('Y-m-d h:i:s', strtotime($orderDetails['created_at'])); }}</label>
+                     <label>{{ date('Y-m-d h:i:s', strtotime($orderDetails['created_at'])) }}</label>
                   </div>
                   <div class="form-group" style="height: 15px;">
                      <label style="font-weight: 550;">Order Status: </label>

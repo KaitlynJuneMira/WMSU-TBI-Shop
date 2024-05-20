@@ -1820,14 +1820,13 @@ class AdminController extends Controller
                 /*echo "<pre>"; print_r($data); die;*/
                 // Enter Validation
                 $rules = [
-                'vendor_name' => 'required|regex:/^[\pL\s\-]+$/u',
+                'vendor_name' => 'required',
                 'vendor_city' => 'required|regex:/^[\pL\s\-]+$/u',
                 'vendor_mobile' => 'required|numeric',
                 ];
                 // Custom erro messages
                 $customMessages = [
                     'vendor_name.required' => 'Name is required',
-
                     'vendor_name.regex' => 'Valid Name is required',
                     'vendor_city.regex' => 'Valid City is required',
                     'vendor_mobile.required' => 'Mobile is required',
@@ -1859,7 +1858,7 @@ class AdminController extends Controller
                 $commision = 0;
                 // Update in vendors table
                 Vendor::where('id',Auth::guard('admin')->user()->vendor_id)->update(['name'=>$data['vendor_name'],'mobile'=>$data['vendor_mobile'],'address'=>$data['vendor_address'],'city'=>$data['vendor_city'],'barangay'=>$data['vendor_barangay'], 'commission'=> $commision,'country'=>$data['vendor_country'],'pincode'=>$data['vendor_pincode']]);
-                return redirect()->back()->with('success_message','Vendor details updated successfully!');
+                return redirect()->back()->with('success_message','Vendor personal details updated successfully!');
             }
             $vendorDetails = Vendor::where('id',Auth::guard('admin')->user()->vendor_id)->first()->toArray();
         }else if($slug=="business"){
@@ -1872,7 +1871,6 @@ class AdminController extends Controller
                 'shop_name' => 'required|regex:/^[\pL\s\-]+$/u',
                 'shop_city' => 'required|regex:/^[\pL\s\-]+$/u',
                 'shop_mobile' => 'required|numeric',
-                'address_proof' => 'required',
                 ];
                 // Custom Erro Messages
                 $customMessages = [
@@ -1881,12 +1879,11 @@ class AdminController extends Controller
                     'shop_city.regex' => 'Valid City is required',
                     'shop_mobile.required' => 'Mobile is required',
                     'shop_mobile.numeric' => 'Valid Mobile is required',
-                    'address_proof.required' => 'Image is required',
                 ];
 
                 $this->validate($request,$rules,$customMessages);
 
-                // Upload Admin Photo
+                // Upload Gov id Proof
                 if($request->hasFile('address_proof_image')){
                     $image_tmp = $request->file('address_proof_image');
                     if($image_tmp->isValid()){
@@ -1920,17 +1917,49 @@ class AdminController extends Controller
                 }else{
                     $permitimageName = "";
                 }
+                // Upload Bir Proof
+                if($request->hasFile('bir_image')){
+                    $image_tmp = $request->file('bir_image');
+                    if($image_tmp->isValid()){
+                        $birimageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'admin/images/proofs/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+                    }
+                }else if(!empty($data['current_bir_proof'])){
+                    $birimageName = $data['current_bir_proof'];
+                }else{
+                    $birimageName = "";
+                }
+                //Upload DTI Proof
+                if($request->hasFile('dti_image')){
+                    $image_tmp = $request->file('dti_image');
+                    if($image_tmp->isValid()){
+                        // Get Image Extension
+                        $extension = $image_tmp->getClientOriginalExtension();
+                        // Generate New Image Name
+                        $dtiimageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'admin/images/proofs/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+                    }
+                }else if(!empty($data['current_dti_proof'])){
+                    $dtiimageName = $data['current_dti_proof'];
+                }else{
+                    $dtiimageName = "";
+                }
+
                 $vendorCount = VendorsBusinessDetail::where('vendor_id',Auth::guard('admin')->user()->vendor_id)->count();
                 if($vendorCount>0){
                   
                     // Update in vendors_business_details table
-                VendorsBusinessDetail::where('vendor_id',Auth::guard('admin')->user()->vendor_id)->update(['shop_name'=>$data['shop_name'],'shop_mobile'=>$data['shop_mobile'],'shop_address'=>$data['shop_address'],'shop_city'=>$data['shop_city'],'shop_barangay'=>$data['shop_barangay'],'shop_country'=>$data['shop_country'],'shop_pincode'=>$data['shop_pincode'],'business_license_number'=>$data['business_license_number'],'gst_number'=>$data['gst_number'],'pan_number'=>$data['pan_number'],'address_proof'=>$data['address_proof'],'address_proof_image'=>$imageName,'permit_proof_image'=>$permitimageName]);
+                VendorsBusinessDetail::where('vendor_id',Auth::guard('admin')->user()->vendor_id)->update(['shop_name'=>$data['shop_name'],'shop_mobile'=>$data['shop_mobile'],'shop_address'=>$data['shop_address'],'shop_city'=>$data['shop_city'],'shop_barangay'=>$data['shop_barangay'],'shop_country'=>$data['shop_country'],'shop_pincode'=>$data['shop_pincode'],'address_proof'=>'','address_proof_image'=>$imageName,'permit_proof_image'=>$permitimageName,'bir_image'=>$birimageName,'dti_image'=>$dtiimageName]);
                 }else{
                     // Update in vendors_business_details table
-                    VendorsBusinessDetail::insert(['vendor_id'=>Auth::guard('admin')->user()->vendor_id,'shop_name'=>$data['shop_name'],'shop_mobile'=>$data['shop_mobile'],'shop_address'=>$data['shop_address'],'shop_city'=>$data['shop_city'],'shop_barangay'=>$data['shop_barangay'],'shop_country'=>$data['shop_country'],'shop_pincode'=>$data['shop_pincode'],'business_license_number'=>$data['business_license_number'],'gst_number'=>$data['gst_number'],'pan_number'=>$data['pan_number'],'address_proof'=>$data['address_proof'],'address_proof_image'=>$imageName,'permit_proof_image'=>$permitimageName]);    
+                    VendorsBusinessDetail::insert(['vendor_id'=>Auth::guard('admin')->user()->vendor_id,'shop_name'=>$data['shop_name'],'shop_mobile'=>$data['shop_mobile'],'shop_address'=>$data['shop_address'],'shop_city'=>$data['shop_city'],'shop_barangay'=>$data['shop_barangay'],'shop_country'=>$data['shop_country'],'shop_pincode'=>$data['shop_pincode'],'address_proof'=>'','address_proof_image'=>$imageName,'permit_proof_image'=>$permitimageName,'bir_image'=>$birimageName,'dti_image'=>$dtiimageName]);    
                 }
                 
-                return redirect()->back()->with('success_message','Vendor details updated successfully!');
+                return redirect()->back()->with('success_message','Vendor business details updated successfully!');
             }
             $vendorCount = VendorsBusinessDetail::where('vendor_id',Auth::guard('admin')->user()->vendor_id)->count();
             if($vendorCount>0){
@@ -1939,7 +1968,7 @@ class AdminController extends Controller
                 $vendorDetails = array();   
             }
             
-            /*dd($vendorDetails);*/
+            // dd($vendorDetails);
         }else if($slug=="bank"){
             Session::put('page','update_bank_details');
             if($request->isMethod('post')){
@@ -2049,28 +2078,46 @@ class AdminController extends Controller
     }
 
     // View all admins
-    public function admins($type=null){
-        $admins = Admin::query();
-        if(!empty($type)){
-            $admins = $admins->where('type',$type);   
-            $title = ucfirst($type)."s";
-            Session::put('page','view_'.strtolower($title));
-        }else{
-            $title = "All Admins/Subadmins/Vendors";
-            Session::put('page','view_all');
+    public function admins($type = null)
+    {
+        // Define title
+        $title = "All Admins/Subadmins/Vendors";
+        $adminsQuery = Admin::query();
+        // Check if type is provided
+        if (!empty($type)) {
+            $adminsQuery->where('type', $type);
+            
+            // Set the title based on the provided type
+            $title = ucfirst($type) . "s";
         }
-        $admins = $admins->get()->toArray();
-        // dd($admins);
-        return view('admin.admins.admins')->with(compact('admins','title'));
+
+        return view('admin.admins.admins')->with([
+            'admins' => $adminsQuery->get(['id', 'name', 'email', 'type','mobile','image','status','created_at'])->toArray(),
+            'title' => $title
+        ]);
     }
 
     // View vendor details
     public function viewVendorDetails($id){
-        $vendorDetails = Admin::with('vendorPersonal','vendorBusiness','vendorBank')->where('id',$id)->first();
+
+        // dd($id);
+        //vendor details accross tables
+        $vendorDetails = Admin::where('id',$id)->first();
         $vendorDetails = json_decode(json_encode($vendorDetails),true);
-        /*dd($vendorDetails);*/
-        return view('admin.admins.view_vendor_details')->with(compact('vendorDetails'));
+        
+        $vendorBusiness = VendorsBusinessDetail::where('vendor_id',$id)->first();
+        $vendorBusiness = json_decode(json_encode($vendorBusiness),true);
+
+        $vendor = Vendor::where('id',$id)->first();
+        $vendor = json_decode(json_encode($vendor),true);
+        // dd($vendorDetails);
+        
+        dd($vendorBusiness);
+        // dd($vendor);
+
+        return view('admin.admins.view_vendor_details')->with(compact('vendorDetails','vendorBusiness','vendor'));
     }
+    
 
     // Update admin status
     public function updateAdminStatus(Request $request){

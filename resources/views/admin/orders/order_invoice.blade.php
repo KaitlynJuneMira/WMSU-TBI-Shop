@@ -56,7 +56,7 @@
     			<div class="col-xs-6 text-right">
     				<address>
     					<strong>Order Date:</strong><br>
-    					{{ date('Y-m-d h:i:s', strtotime($orderDetails['created_at'])); }}<br><br>
+    					{{ date('Y-m-d h:i:s', strtotime($orderDetails['created_at'])) }}<br><br>
     				</address>
     			</div>
     		</div>

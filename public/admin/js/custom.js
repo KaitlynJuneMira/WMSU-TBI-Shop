@@ -68,27 +68,34 @@ $(document).ready(function(){
 
 	// Update Page Status
 	$(document).on("click",".updateAdminStatus",function(){
-		var status = $(this).children("i").attr("status");
+		var status = $(this).data("status");
 		var admin_id = $(this).attr("admin_id");
-		$.ajax({
-			headers: {
-        		'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    		},
-			type:'post',
-			url:'/admin/update-admin-status',
-			data:{status:status,admin_id:admin_id},
-			success:function(resp){
-				// alert(resp);
-				if(resp['status']==0){
-					$("#admin-"+admin_id).html("<i style='font-size:25px;' class='mdi mdi-bookmark-outline' status='Inactive'></i>");
-				}else if(resp['status']==1){
-					$("#admin-"+admin_id).html("<i style='font-size:25px;' class='mdi mdi-bookmark-check' status='Active'></i>");
+		
+		// Show confirmation modal
+		if(confirm("Are you sure you want to change the status to " + status + "?")) {
+			$.ajax({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				type:'post',
+				url:'/admin/update-admin-status',
+				data:{status:status, admin_id:admin_id},
+				success:function(resp){
+					if(resp['status']==0){
+						$("#admin-"+admin_id).html("<a class='updateAdminStatus btn btn-danger' id='admin-"+admin_id+"' admin_id='"+admin_id+"' href='javascript:void(0)' data-status='Active'><i style='font-size:25px;' status='Active'></i>Active</a>");
+					} else if(resp['status']==1){
+						$("#admin-"+admin_id).html("<a class='updateAdminStatus btn btn-success' id='admin-"+admin_id+"' admin_id='"+admin_id+"' href='javascript:void(0)' data-status='Inactive'><i style='font-size:25px;' status='Inactive'></i>Inactive</a>");
+					}
+					// Refresh the page
+					location.reload();
+				},
+				error:function(){
+					alert("Error");
 				}
-			},error:function(){
-				alert("Error");
-			}
-		})
+			});
+		}
 	});
+	
 
 	// Update Banner Status
 	$(document).on("click",".updateBannerStatus",function(){

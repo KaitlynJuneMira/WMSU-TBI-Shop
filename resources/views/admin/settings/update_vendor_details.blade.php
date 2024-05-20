@@ -62,7 +62,7 @@
                            </div>
                            <div class="form-group">
                               <label for="vendor_address">Address Details</label>
-                              <input type="text" class="form-control" id="vendor_address" placeholder="Enter Address" name="vendor_address" value="{{ $vendorDetails['address'] }}">
+                              <input type="text" class="form-control" id="vendor_address" placeholder="Enter Address" name="vendor_address" @if(isset($vendorDetails['address'])) value="{{ $vendorDetails['address'] }}" @endif">
                            </div>
                            <div class="form-group">
                               <label for="vendor_city">City</label>
@@ -92,7 +92,7 @@
                               <input type="text" class="form-control" id="vendor_mobile" placeholder="Enter 11 Digit Mobile Number" name="vendor_mobile" value="{{ Auth::guard('admin')->user()->mobile }}" required="" maxlength="11" minlength="11">
                            </div>
                            <div class="form-group">
-                              <label for="vendor_image">Photo</label>
+                              <label for="vendor_image">Profile Picture</label>
                               <div class="custom-file">
                                  <input type="file" class="custom-file-input" id="vendor_image" name="vendor_image" onchange="previewVendorImage(event)">
                                  <label class="custom-file-label" for="vendor_image">Choose file</label>
@@ -199,31 +199,13 @@
                                  <input type="text" class="form-control" id="shop_mobile" placeholder="Enter 11 Digit Mobile Number" name="shop_mobile" @if(isset($vendorDetails['shop_mobile'])) value="{{ $vendorDetails['shop_mobile'] }}" @endif required="" maxlength="11" minlength="11">
                               </div>
                               <div class="form-group">
-                                 <label for="business_license_number">Business License Number</label>
-                                 <input type="text" class="form-control" id="business_license_number" placeholder="Enter Business License Number" name="business_license_number" @if(isset($vendorDetails['business_license_number'])) value="{{ $vendorDetails['business_license_number'] }}" @endif>
-                              </div>
-                              <div class="form-group">
-                                 <input type="hidden" class="form-control" id="gst_number" placeholder="Enter GST Number" name="gst_number" @if(isset($vendorDetails['gst_number'])) value="{{ $vendorDetails['gst_number'] }}" @endif>
-                              </div>
-                              <div class="form-group">
-                                 <input type="hidden" class="form-control" id="pan_number" placeholder="Enter PAN Number" name="pan_number" @if(isset($vendorDetails['pan_number'])) value="{{ $vendorDetails['pan_number'] }}" @endif>
-                              </div>
-                              <div class="form-group">
-                                 <label for="address_proof">Government Issued ID</label>
-                                 <select class="form-control" name="address_proof" id="address_proof">
-                                 <option value="Passport" @if(isset($vendorDetails['address_proof']) && $vendorDetails['address_proof']=="Passport") selected @endif>Passport</option>
-                                 <option value="Voters ID" @if(isset($vendorDetails['address_proof']) && $vendorDetails['address_proof']=="Voters ID<") selected @endif>Voters ID</option>
-                                 <option value="TIN ID" @if(isset($vendorDetails['address_proof']) && $vendorDetails['address_proof']=="TIN ID") selected @endif>TIN ID</option>
-                                 <option value="Drivers License" @if(isset($vendorDetails['address_proof']) && $vendorDetails['address_proof']=="Drivers License") selected @endif>Drivers License</option>
-                                 <option value="NBI Clearance" @if(isset($vendorDetails['address_proof']) && $vendorDetails['address_proof']=="NBI Clearance") selected @endif>NBI Clearance</option>
-                                 </select>
-                              </div>
-                              <div class="form-group">
-                                 <label for="address_proof_image">Government Issued ID Proof</label>
+                                 <label for="address_proof_image">Government Issued ID</label>
                                  <input type="file" class="form-control" id="address_proof_image" name="address_proof_image">
                                  @if(!empty($vendorDetails['address_proof_image']))
                                  <a target="_blank" href="{{ url('admin/images/proofs/'.$vendorDetails['address_proof_image']) }}">View Image</a>
                                  <input type="hidden" name="current_address_proof" value="{{ $vendorDetails['address_proof_image'] }}">
+                                 @else
+                                 <a>No image chosen</a>
                                  @endif
                               </div>
                               <div class="form-group">
@@ -231,7 +213,29 @@
                                  <input type="file" class="form-control" id="permit_proof_image" name="permit_proof_image">
                                  @if(!empty($vendorDetails['permit_proof_image']))
                                  <a target="_blank" href="{{ url('admin/images/proofs/'.$vendorDetails['permit_proof_image']) }}">View Image</a>
-                                 <input type="hidden" name="current_permit_image" value="{{ $vendorDetails['permit_proof_image'] }}">
+                                 <input type="hidden" name="current_permit_proof" value="{{ $vendorDetails['permit_proof_image'] }}">
+                                 @else
+                                 <a>No image chosen</a>
+                                 @endif
+                              </div>
+                              <div class="form-group">
+                                 <label for="abir_image">BIR Permit</label>
+                                 <input type="file" class="form-control" id="bir_image" name="bir_image">
+                                 @if(!empty($vendorDetails['bir_image']))
+                                 <a target="_blank" href="{{ url('admin/images/proofs/'.$vendorDetails['bir_image']) }}">View Image</a>
+                                 <input type="hidden" name="current_bir_proof" value="{{ $vendorDetails['bir_image'] }}">
+                                 @else
+                                 <a>No image chosen</a>
+                                 @endif
+                              </div>
+                              <div class="form-group">
+                                 <label for="adti_image">DTI Permit</label>
+                                 <input type="file" class="form-control" id="dti_image" name="dti_image">
+                                 @if(!empty($vendorDetails['dti_image']))
+                                 <a target="_blank" href="{{ url('admin/images/proofs/'.$vendorDetails['dti_image']) }}">View Image</a>
+                                 <input type="hidden" name="current_dti_proof" value="{{ $vendorDetails['dti_image'] }}">
+                                 @else
+                                 <a>No image chosen</a>
                                  @endif
                               </div>
                            </div>
